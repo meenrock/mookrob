@@ -1,0 +1,15 @@
+env: local
+
+server:
+  rest-port: 8081
+  grpc-port: 50051
+
+database:
+  host: localhost
+  port: 5440
+  name: user
+  user: postgres
+  password: postgres
+
+client:
+  meal-grpc-host: "localhost:50052"

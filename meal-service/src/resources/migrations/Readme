@@ -1,0 +1,20 @@
+1. Install the Migrate CLI:
+  go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+2. Create a Database:
+
+3. Initialize Migrations:
+  migrate create -ext sql -dir ./resources/migrations <migration_name>
+
+4. Edit the Migration File:
+  ex: CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          username VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL
+      );
+
+5. Apply Migrations:
+  migrate -database "postgres://{username}:{password}@localhost:{port}/{db_name}?sslmode=disable" -path ./resources/migrations up
+
+6. Rollback Migrations (Optional):
+  migrate -database <database_url> -path ./resources/migrations down
