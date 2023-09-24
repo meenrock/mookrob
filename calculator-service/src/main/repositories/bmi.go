@@ -1,16 +1,14 @@
 package repositories
 
-package controllers
-
 import "fmt"
 
 func BMIPercentile(age int, height float64, weight float64, gender string) (float64, error) {
 
 	if age < 0 || height <= 0 || weight <= 0 {
-		return 0, fmt.Errorf("Invalid input for BMIPercentile")
+		return 0, fmt.Errorf("invalid input for bmipercentile")
 	}
-	if gender != "Male" || gender != "Female" {
-		return 0, fmt.Errorf("Invalid input for gender should be male or female only")
+	if gender != "Male" && gender != "Female" {
+		return 0, fmt.Errorf("invalid input for gender should be male or female only")
 	}
 	heightMeters := height * 0.01
 	bmi := weight / (heightMeters * heightMeters)
