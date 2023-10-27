@@ -5,8 +5,8 @@ server:
   grpc-port: 50052
 
 database:
-  host: localhost
-  port: 5441
-  name: meal
-  user: postgres
-  password: postgres
+  host: 192.168.1.196
+  port: 5432
+  name: mookrob
+  user: meendev
+  password: meenmook

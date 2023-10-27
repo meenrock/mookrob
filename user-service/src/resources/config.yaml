@@ -5,11 +5,11 @@ server:
   grpc-port: 50051
 
 database:
-  host: localhost
-  port: 5440
-  name: user
-  user: postgres
-  password: postgres
+  host: 192.168.1.187
+  port: 5432
+  name: mookrob
+  user: meendev
+  password: meenmook
 
 client:
   meal-grpc-host: "localhost:50052"

@@ -136,3 +136,60 @@ func (s *UserRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, userFavResponse)
 }
+
+func (s *UserRestService) EditUserFavFoodByUserId(ctx *gin.Context) {
+	// connect meal service
+	conn, err := grpc.Dial(s.mealGrpcHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Printf("rest GetUserFavFoodByUserId failed to connect meal server: %v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+	defer conn.Close()
+
+	// define meal client
+	mealCon := pb.NewMealClient(conn)
+
+	// build GetUserFavFood request
+	req := &pb.GetUserFavFoodRequest{
+		Id: ctx.Param("id"),
+	}
+
+	// send grpc request
+	stream, err := mealCon.GetUserFavFood(context.Background(), req)
+	if err != nil {
+		log.Printf("rest GetUserFavFoodByUserId failed RPC: %v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	var userFavResponse []UserFavFoodResponse
+	// loop recieve stream data
+	for {
+		response, err := stream.Recv()
+		if err == io.EOF {
+			// end of the stream, no more data
+			break
+		}
+		if err != nil {
+			log.Printf("rest GetUserFavFoodByUserId failed RPC meal stream: %v", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+			return
+		}
+
+		// build response
+		userFav := UserFavFoodResponse{
+			Id:           response.Id,
+			Name:         response.Name,
+			Energy:       response.Energy,
+			Protein:      &response.Protein,
+			Carbohydrate: &response.Carbohydrate,
+			Fat:          &response.Fat,
+			Sodium:       &response.Sodium,
+			Cholesterol:  &response.Cholesterol,
+		}
+		userFavResponse = append(userFavResponse, userFav)
+	}
+
+	ctx.JSON(http.StatusOK, userFavResponse)
+}
