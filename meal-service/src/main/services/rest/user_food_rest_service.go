@@ -4,11 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/mookrob/servicemeal/main/models"
 	"github.com/mookrob/servicemeal/main/repositories"
+	"github.com/mookrob/shared/utils"
 )
 
 type UserFoodRestService struct {
@@ -31,28 +30,19 @@ type UserFavFoodResponse struct {
 }
 
 func (s *UserFoodRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
-	userData, exist := ctx.Get("userData")
+	userDataRaw, exist := ctx.Get("userData")
 	if exist != true {
 		log.Printf("rest GetUserFavFoodByUserId failed parse userData")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
 	}
 
-	mapClaims, ok := userData.(jwt.MapClaims)
-	if ok != true {
-		log.Printf("rest GetUserFavFoodByUserId failed parse user id")
+	userData, ok := utils.ExtractUserData(userDataRaw)
+	if !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
-		return
 	}
 
-	id, err := uuid.Parse(mapClaims["user_id"].(string))
-	if err != nil {
-		log.Printf("rest GetUserFavFoodByUserId failed parse user id")
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
-		return
-	}
-
-	rows, err := s.UserFoodRepository.GetUserFavFoodByUserId(id)
+	rows, err := s.UserFoodRepository.GetUserFavFoodByUserId(userData.UserId)
 	if err != nil {
 		log.Printf("rest GetUserFavFoodByUserId failed on user food repository call: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})

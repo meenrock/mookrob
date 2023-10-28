@@ -11,6 +11,6 @@ import (
 func SetUserFoodRoutes(router *gin.Engine, ctrls *services.UserFoodRestService) {
 	userRoutes := router.Group("/api/meal/user-food")
 	{
-		userRoutes.GET("/fav", authentication.AuthMiddleware(constants.USER), ctrls.GetUserFavFoodByUserId)
+		userRoutes.GET("/fav", authentication.AuthMiddleware(constants.GENERAL_USER), ctrls.GetUserFavFoodByUserId)
 	}
 }
