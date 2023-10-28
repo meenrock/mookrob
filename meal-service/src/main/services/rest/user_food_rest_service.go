@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/mookrob/servicemeal/main/models"
@@ -30,12 +31,27 @@ type UserFavFoodResponse struct {
 }
 
 func (s *UserFoodRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
-	id, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		log.Printf("rest GetUserFavFoodByUserId failed parse param: %v", err)
+	userData, exist := ctx.Get("userData")
+	if exist != true {
+		log.Printf("rest GetUserFavFoodByUserId failed parse userData")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
 	}
+
+	mapClaims, ok := userData.(jwt.MapClaims)
+	if ok != true {
+		log.Printf("rest GetUserFavFoodByUserId failed parse user id")
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+		return
+	}
+
+	id, err := uuid.Parse(mapClaims["user_id"].(string))
+	if err != nil {
+		log.Printf("rest GetUserFavFoodByUserId failed parse user id")
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+		return
+	}
+
 	rows, err := s.UserFoodRepository.GetUserFavFoodByUserId(id)
 	if err != nil {
 		log.Printf("rest GetUserFavFoodByUserId failed on user food repository call: %v", err)

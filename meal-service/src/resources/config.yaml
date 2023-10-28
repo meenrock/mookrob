@@ -10,3 +10,6 @@ database:
   name: meal
   user: postgres
   password: postgres
+
+jwt:
+  secret_key: fsdfk&wq#452!dsd
