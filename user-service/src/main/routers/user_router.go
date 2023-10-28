@@ -11,6 +11,7 @@ import (
 func SetUserRoutes(router *gin.Engine, ctrls *services.UserRestService) {
 	userRoutes := router.Group("/api/user")
 	{
+		userRoutes.POST("/create", ctrls.CreateUser)
 		userRoutes.GET("/detail", authentication.AuthMiddleware(constants.GENERAL_USER), ctrls.GetUserById)
 		userRoutes.GET("/fav-food", authentication.AuthMiddleware(constants.GENERAL_USER), ctrls.GetUserFavFoodByUserId)
 	}

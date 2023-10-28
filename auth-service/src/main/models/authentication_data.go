@@ -11,8 +11,8 @@ import (
 
 type AuthenticationData struct {
 	Id        uuid.UUID      `gorm:"column:id; primary_key default:uuid_generate_v4()"`
-	Username  string         `gorm:"column:first_name unique" orm:"size(100)"`
-	Password  string         `gorm:"column:first_name" orm:"size(255)"`
+	Username  string         `gorm:"column:username unique" orm:"size(100)"`
+	Password  string         `gorm:"column:password" orm:"size(255)"`
 	UserId    *uuid.UUID     `gorm:"column:user_id; unique"`
 	Role      constants.Role `gorm:"column:role"`
 	Status    enums.Status   `gorm:"column:status"`
