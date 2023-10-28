@@ -1,10 +1,10 @@
-package service
+package services
 
 import (
 	"log"
 
 	"github.com/google/uuid"
-	pb "github.com/mookrob/serviceuser/main/grpc-server/github.com/mookrob"
+	pb "github.com/mookrob/serviceuser/main/grpc-server/github.com/mookrob/serviceuser"
 	repositories "github.com/mookrob/serviceuser/main/repositories"
 )
 
