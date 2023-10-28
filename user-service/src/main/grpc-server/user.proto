@@ -6,7 +6,7 @@ option go_package = "github.com/mookrob/serviceuser";
 
 service User {
     rpc GetUserById (GetUserIdRequest) returns (stream UserItem) {}
-    rpc EditUserById (EditUserRequest) returns (stream UserItem) {}
+    rpc EditUserByUserId (EditUserRequest) returns (stream UserItem) {}
 }
 
 message Empty{}

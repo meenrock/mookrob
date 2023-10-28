@@ -18,7 +18,7 @@ func NewUserGrpcService(r *repositories.UserRepository) *UserServer {
 
 func (s *UserServer) mustEmbedUnimplementedUserServer() {}
 
-func (s *UserServer) EditUserByUserId(req *pb.GetUserIdRequest, stream pb.User_EditUserByIdServer) error {
+func (s *UserServer) EditUserByUserId(req *pb.GetUserIdRequest, stream pb.User_EditUserByUserIdServer) error {
 
 	id, err := uuid.Parse(req.Id)
 	if err != nil {

@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	User_GetUserById_FullMethodName  = "/protouser.User/GetUserById"
-	User_EditUserById_FullMethodName = "/protouser.User/EditUserById"
+	User_GetUserById_FullMethodName      = "/protouser.User/GetUserById"
+	User_EditUserByUserId_FullMethodName = "/protouser.User/EditUserByUserId"
 )
 
 // UserClient is the client API for User service.
@@ -28,7 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserClient interface {
 	GetUserById(ctx context.Context, in *GetUserIdRequest, opts ...grpc.CallOption) (User_GetUserByIdClient, error)
-	EditUserById(ctx context.Context, in *EditUserRequest, opts ...grpc.CallOption) (User_EditUserByIdClient, error)
+	EditUserByUserId(ctx context.Context, in *EditUserRequest, opts ...grpc.CallOption) (User_EditUserByUserIdClient, error)
 }
 
 type userClient struct {
@@ -71,12 +71,12 @@ func (x *userGetUserByIdClient) Recv() (*UserItem, error) {
 	return m, nil
 }
 
-func (c *userClient) EditUserById(ctx context.Context, in *EditUserRequest, opts ...grpc.CallOption) (User_EditUserByIdClient, error) {
-	stream, err := c.cc.NewStream(ctx, &User_ServiceDesc.Streams[1], User_EditUserById_FullMethodName, opts...)
+func (c *userClient) EditUserByUserId(ctx context.Context, in *EditUserRequest, opts ...grpc.CallOption) (User_EditUserByUserIdClient, error) {
+	stream, err := c.cc.NewStream(ctx, &User_ServiceDesc.Streams[1], User_EditUserByUserId_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &userEditUserByIdClient{stream}
+	x := &userEditUserByUserIdClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -86,16 +86,16 @@ func (c *userClient) EditUserById(ctx context.Context, in *EditUserRequest, opts
 	return x, nil
 }
 
-type User_EditUserByIdClient interface {
+type User_EditUserByUserIdClient interface {
 	Recv() (*UserItem, error)
 	grpc.ClientStream
 }
 
-type userEditUserByIdClient struct {
+type userEditUserByUserIdClient struct {
 	grpc.ClientStream
 }
 
-func (x *userEditUserByIdClient) Recv() (*UserItem, error) {
+func (x *userEditUserByUserIdClient) Recv() (*UserItem, error) {
 	m := new(UserItem)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (x *userEditUserByIdClient) Recv() (*UserItem, error) {
 // for forward compatibility
 type UserServer interface {
 	GetUserById(*GetUserIdRequest, User_GetUserByIdServer) error
-	EditUserById(*EditUserRequest, User_EditUserByIdServer) error
+	EditUserByUserId(*EditUserRequest, User_EditUserByUserIdServer) error
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -119,8 +119,8 @@ type UnimplementedUserServer struct {
 func (UnimplementedUserServer) GetUserById(*GetUserIdRequest, User_GetUserByIdServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetUserById not implemented")
 }
-func (UnimplementedUserServer) EditUserById(*EditUserRequest, User_EditUserByIdServer) error {
-	return status.Errorf(codes.Unimplemented, "method EditUserById not implemented")
+func (UnimplementedUserServer) EditUserByUserId(*EditUserRequest, User_EditUserByUserIdServer) error {
+	return status.Errorf(codes.Unimplemented, "method EditUserByUserId not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -156,24 +156,24 @@ func (x *userGetUserByIdServer) Send(m *UserItem) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _User_EditUserById_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _User_EditUserByUserId_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(EditUserRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(UserServer).EditUserById(m, &userEditUserByIdServer{stream})
+	return srv.(UserServer).EditUserByUserId(m, &userEditUserByUserIdServer{stream})
 }
 
-type User_EditUserByIdServer interface {
+type User_EditUserByUserIdServer interface {
 	Send(*UserItem) error
 	grpc.ServerStream
 }
 
-type userEditUserByIdServer struct {
+type userEditUserByUserIdServer struct {
 	grpc.ServerStream
 }
 
-func (x *userEditUserByIdServer) Send(m *UserItem) error {
+func (x *userEditUserByUserIdServer) Send(m *UserItem) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -191,8 +191,8 @@ var User_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "EditUserById",
-			Handler:       _User_EditUserById_Handler,
+			StreamName:    "EditUserByUserId",
+			Handler:       _User_EditUserByUserId_Handler,
 			ServerStreams: true,
 		},
 	},
