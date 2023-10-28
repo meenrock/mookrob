@@ -4,9 +4,23 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gin-gonic/gin"
+	// pub "github.com/mookrob/serviceuser/main/queue"
+	// repositories "github.com/mookrob/serviceuser/main/repositories"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
 )
+
+func PublishUserInfo(ctx *gin.Context) {
+	// conn, ch := CreateRabbitMQConnection()
+
+	// req := &pb.GetUserFavFoodRequest{
+	// 	Id: ctx.Param("id"),
+	// }
+
+	// pub.PublishMessage(ch, "", message)
+
+}
 
 func failOnError(err error, msg string) {
 	if err != nil {

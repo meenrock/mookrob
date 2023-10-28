@@ -12,5 +12,6 @@ func SetUserRoutes(router *gin.Engine, ctrls *services.UserRestService) {
 		userRoutes.GET("/:id", ctrls.GetUserById)
 		userRoutes.GET("/fav-food/:id", ctrls.GetUserFavFoodByUserId)
 		userRoutes.GET("/edit/:id", ctrls.EditUserFavFoodByUserId)
+		userRoutes.GET("/message/:id")
 	}
 }

@@ -55,8 +55,9 @@ func main() {
 	userRepository := repositories.NewUserRepository(db)
 
 	go func() {
-		userGrpcService := grpc_services.NewUserGrpcService(userRepository)
-		pb.RegisterUserServer(grpc_server, userGrpcService)
+		//userGrpcService := grpc_services.NewUserGrpcService(userRepository)
+		grpcServer := grpc.NewServer()
+		pb.RegisterUserServer(grpcServer, grpc_services.GrpcServerImpl{})
 
 		grpc_port := fmt.Sprintf(":%v", GRPC_PORT)
 		lis, err := net.Listen("tcp", grpc_port)
@@ -70,13 +71,17 @@ func main() {
 
 	}()
 
-	userRestService := rest_services.NewUserRestService(userRepository)
-	routers.SetUserRoutes(gin_engine, userRestService)
+	go func() {
+		userRestService := rest_services.NewUserRestService(userRepository)
+		routers.SetUserRoutes(gin_engine, userRestService)
 
-	// Start the server
-	port := fmt.Sprintf(":%v", REST_PORT)
-	fmt.Println("Server Running on Port", REST_PORT)
-	if err := gin_engine.Run(port); err != nil {
-		log.Fatal(err)
-	}
+		// Start the server
+		port := fmt.Sprintf(":%v", REST_PORT)
+		fmt.Println("Server Running on Port", REST_PORT)
+		if err := gin_engine.Run(port); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	select {}
 }

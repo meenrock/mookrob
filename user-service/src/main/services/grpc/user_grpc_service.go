@@ -12,6 +12,10 @@ type UserServer struct {
 	UserRepository *repositories.UserRepository
 }
 
+type GrpcServerImpl struct {
+	pb.UnimplementedUserServer
+}
+
 func NewUserGrpcService(r *repositories.UserRepository) *UserServer {
 	return &UserServer{UserRepository: r}
 }
