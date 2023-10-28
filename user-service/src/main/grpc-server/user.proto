@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package protouser;
+
+option go_package = "github.com/mookrob/serviceuser";
+
+service User {
+    rpc GetUserById (GetUserIdRequest) returns (stream UserItem) {}
+    rpc EditUserById (EditUserRequest) returns (stream UserItem) {}
+}
+
+message Empty{}
+
+message GetUserIdRequest {
+    string id=1;
+}
+
+enum Status {
+    ACTIVE = 0;
+	INACTIVE = 1;
+}
+
+message EditUserRequest {
+    string id = 1;
+    Status status = 2;
+    string firstname = 3;
+    string lastname = 4;
+    string nickname = 5;
+    string phonenumber = 6;
+    string email = 7;
+    string gender = 8;
+    double age = 9;
+    double height = 10;
+    double weight = 11;
+    double expectedbmi = 12;
+}
+
+message UserItem {
+    string id = 1;
+    Status status = 2;
+    string firstname = 3;
+    string lastname = 4;
+    string nickname = 5;
+    string phonenumber = 6;
+    string email = 7;
+    string gender = 8;
+    double age = 9;
+    double height = 10;
+    double weight = 11;
+    double expectedbmi = 12;
+}

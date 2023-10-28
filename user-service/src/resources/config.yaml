@@ -13,3 +13,9 @@ database:
 
 client:
   meal-grpc-host: "localhost:50052"
+
+rabbitmq:
+  host:
+  port:
+  user:
+  password:
