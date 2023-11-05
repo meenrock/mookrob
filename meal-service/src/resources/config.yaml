@@ -17,3 +17,9 @@ database:
   name: mookrob
   user: meendev
   password: meenmook
+
+rabbitmq:
+  host: 192.168.1.187
+  port: 5672
+  user: meendev
+  password: meen

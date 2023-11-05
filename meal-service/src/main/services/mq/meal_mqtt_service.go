@@ -1,4 +1,4 @@
-package services
+package message_services
 
 import (
 	"fmt"

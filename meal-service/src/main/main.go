@@ -9,6 +9,7 @@ import (
 	repositories "github.com/mookrob/servicemeal/main/repositories"
 	routers "github.com/mookrob/servicemeal/main/routers"
 	grpc_services "github.com/mookrob/servicemeal/main/services/grpc"
+	mqtt_services "github.com/mookrob/servicemeal/main/services/mq"
 	rest_services "github.com/mookrob/servicemeal/main/services/rest"
 
 	"github.com/gin-gonic/gin"
@@ -79,6 +80,13 @@ func main() {
 		if err := gin_engine.Run(rest_port); err != nil {
 			log.Fatal(err)
 		}
+	}()
+
+	go func() {
+		conn, ch := mqtt_services.CreateRabbitMQConnection()
+		defer conn.Close()
+		defer ch.Close()
+
 	}()
 
 	// keep server running

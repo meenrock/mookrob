@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	mqtt_services "github.com/mookrob/servicecalculator/main/services/mq"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/viper"
@@ -47,4 +49,12 @@ func main() {
 	if err := r.Run(port); err != nil {
 		log.Fatal(err)
 	}
+
+	go func() {
+		conn, ch := mqtt_services.CreateRabbitMQConnection()
+		defer conn.Close()
+		defer ch.Close()
+
+	}()
+
 }
