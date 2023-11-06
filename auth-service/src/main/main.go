@@ -1,8 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
+
+	repositories "github.com/mookrob/serviceauth/main/repositories"
+	routers "github.com/mookrob/serviceauth/main/routers"
+	rest_services "github.com/mookrob/serviceauth/main/services/rest"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -22,24 +27,24 @@ func main() {
 	}
 
 	// DB connection
-	// DB_HOST := viper.GetString("database.host")
-	// DB_PORT := viper.GetString("database.port")
-	// DB_NAME := viper.GetString("database.name")
-	// DB_USER := viper.GetString("database.user")
-	// DB_PASSWORD := viper.GetString("database.password")
+	DB_HOST := viper.GetString("database.host")
+	DB_PORT := viper.GetString("database.port")
+	DB_NAME := viper.GetString("database.name")
+	DB_USER := viper.GetString("database.user")
+	DB_PASSWORD := viper.GetString("database.password")
 	PORT := viper.GetString("server.port")
 
 	// // connect postgres
-	// psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
-	// db, err := sql.Open("pgx", psqlInfo)
-	// if err != nil {
-	// 	log.Fatalf("Error while reading config file %s", err)
-	// }
+	psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
+	db, err := sql.Open("pgx", psqlInfo)
+	if err != nil {
+		log.Fatalf("Error while reading config file %s", err)
+	}
 
 	// create instances of services and controllers
-	// userRepository := repositories.NewUserRepository(db)
-	// userService := services.NewUserService(userRepository)
-	// routers.SetUserRoutes(r, userService)
+	authRepository := repositories.NewAuthenticationRepository(db)
+	authService := rest_services.NewUserRestService(authRepository)
+	routers.SetAuthRoutes(r, authService)
 
 	// Start the server
 	port := fmt.Sprintf(":%v", PORT)

@@ -9,6 +9,7 @@ import (
 	enums "github.com/mookrob/serviceuser/main/enums"
 	pb "github.com/mookrob/serviceuser/main/grpc-client/meal"
 	repositories "github.com/mookrob/serviceuser/main/repositories"
+	utils "github.com/mookrob/shared/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -39,16 +40,20 @@ type UserDetailResponse struct {
 }
 
 func (s *UserRestService) GetUserById(ctx *gin.Context) {
-
-	id, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		log.Printf("GetUserById failed to parse param: %v", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Internal"})
+	userDataRaw, exist := ctx.Get("userData")
+	if exist != true {
+		log.Printf("rest GetUserFavFoodByUserId failed parse userData")
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
 	}
 
+	userData, ok := utils.ExtractUserData(userDataRaw)
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+	}
+
 	// call repo
-	user, err := s.UserRepository.GetUserById(id)
+	user, err := s.UserRepository.GetUserById(userData.UserId)
 	if err != nil {
 		log.Printf("GetUserById failed on user repository call: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
@@ -80,6 +85,17 @@ type UserFavFoodResponse struct {
 }
 
 func (s *UserRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
+	userDataRaw, exist := ctx.Get("userData")
+	if exist != true {
+		log.Printf("rest GetUserFavFoodByUserId failed parse userData")
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+		return
+	}
+
+	userData, ok := utils.ExtractUserData(userDataRaw)
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+	}
 
 	// connect meal service
 	conn, err := grpc.Dial(s.mealGrpcHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -95,7 +111,7 @@ func (s *UserRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
 
 	// build GetUserFavFood request
 	req := &pb.GetUserFavFoodRequest{
-		Id: ctx.Param("id"),
+		Id: userData.UserId.String(),
 	}
 
 	// send grpc request

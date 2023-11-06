@@ -6,4 +6,5 @@ use (
 	./auth-service/src
 	./calculator-service/src
 	./restaurant-service/src
+	./shared
 )

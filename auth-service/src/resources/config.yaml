@@ -1,4 +1,15 @@
 env: local
 
 server:
-  port: 8080
+  port: 8083
+
+database:
+  host: localhost
+  port: 5442
+  name: authentication
+  user: postgres
+  password: postgres
+
+jwt:
+  secret_key: fsdfk&wq#452!dsd
+  refresh_key: 4f#38i&$ah1l8&k4

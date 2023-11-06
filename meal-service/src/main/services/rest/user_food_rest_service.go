@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/mookrob/servicemeal/main/models"
 	"github.com/mookrob/servicemeal/main/repositories"
+	"github.com/mookrob/shared/utils"
 )
 
 type UserFoodRestService struct {
@@ -30,13 +30,19 @@ type UserFavFoodResponse struct {
 }
 
 func (s *UserFoodRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
-	id, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		log.Printf("rest GetUserFavFoodByUserId failed parse param: %v", err)
+	userDataRaw, exist := ctx.Get("userData")
+	if exist != true {
+		log.Printf("rest GetUserFavFoodByUserId failed parse userData")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
 	}
-	rows, err := s.UserFoodRepository.GetUserFavFoodByUserId(id)
+
+	userData, ok := utils.ExtractUserData(userDataRaw)
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+	}
+
+	rows, err := s.UserFoodRepository.GetUserFavFoodByUserId(userData.UserId)
 	if err != nil {
 		log.Printf("rest GetUserFavFoodByUserId failed on user food repository call: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
