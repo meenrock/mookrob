@@ -13,6 +13,7 @@ database:
 
 client:
   meal-grpc-host: "localhost:50052"
+  auth-grpc-host: "localhost:50053"
 
 jwt:
   secret_key: fsdfk&wq#452!dsd
