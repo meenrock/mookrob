@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type Food struct {
+type Meal struct {
 	Id           uuid.UUID `gorm:"column:id; primary_key default:uuid_generate_v4()"`
 	Name         string    `gorm:"column:name; unique"`
 	Energy       float64   `gorm:"column:energy"`
@@ -19,6 +19,6 @@ type Food struct {
 	UpdatedAt    time.Time `gorm:"column:updated_at"`
 }
 
-func (t *Food) TableName() string {
-	return "food"
+func (t *Meal) TableName() string {
+	return "meal"
 }

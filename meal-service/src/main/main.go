@@ -50,12 +50,12 @@ func main() {
 	}
 
 	// create instances of services and controllers
-	userFoodRepository := repositories.NewUserFoodRepository(db)
+	userMealRepository := repositories.NewUserMealRepository(db)
 
 	// run async?? server
 	go func() {
-		userFoodGrpcService := grpc_services.NewUserFoodGrpcService(userFoodRepository)
-		pb.RegisterMealServer(grpc_server, userFoodGrpcService)
+		userMealGrpcService := grpc_services.NewUserMealGrpcService(userMealRepository)
+		pb.RegisterMealServer(grpc_server, userMealGrpcService)
 
 		grpc_port := fmt.Sprintf(":%v", GRPC_PORT)
 		lis, err := net.Listen("tcp", grpc_port)
@@ -70,8 +70,8 @@ func main() {
 
 	// run async?? server
 	go func() {
-		userFoodRestService := rest_services.NewUserFoodRestService(userFoodRepository)
-		routers.SetUserFoodRoutes(gin_engine, userFoodRestService)
+		userMealRestService := rest_services.NewUserMealRestService(userMealRepository)
+		routers.SetUserMealRoutes(gin_engine, userMealRestService)
 
 		// Start the server
 		rest_port := fmt.Sprintf(":%v", REST_PORT)

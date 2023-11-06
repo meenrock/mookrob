@@ -10,15 +10,15 @@ import (
 	"github.com/mookrob/shared/utils"
 )
 
-type UserFoodRestService struct {
-	UserFoodRepository *repositories.UserFoodRepository
+type UserMealRestService struct {
+	UserMealRepository *repositories.UserMealRepository
 }
 
-func NewUserFoodRestService(r *repositories.UserFoodRepository) *UserFoodRestService {
-	return &UserFoodRestService{UserFoodRepository: r}
+func NewUserMealRestService(r *repositories.UserMealRepository) *UserMealRestService {
+	return &UserMealRestService{UserMealRepository: r}
 }
 
-type UserFavFoodResponse struct {
+type UserFavMealResponse struct {
 	Id           string   `json:"id"`
 	Name         string   `json:"name"`
 	Energy       float64  `json:"energy"`
@@ -29,10 +29,10 @@ type UserFavFoodResponse struct {
 	Cholesterol  *float64 `json:"cholesterol"`
 }
 
-func (s *UserFoodRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
+func (s *UserMealRestService) GetUserFavMealByUserId(ctx *gin.Context) {
 	userDataRaw, exist := ctx.Get("userData")
 	if exist != true {
-		log.Printf("rest GetUserFavFoodByUserId failed parse userData")
+		log.Printf("rest GetUserFavMealByUserId failed parse userData")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
 	}
@@ -42,36 +42,36 @@ func (s *UserFoodRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 	}
 
-	rows, err := s.UserFoodRepository.GetUserFavFoodByUserId(userData.UserId)
+	rows, err := s.UserMealRepository.GetUserFavMealByUserId(userData.UserId)
 	if err != nil {
-		log.Printf("rest GetUserFavFoodByUserId failed on user food repository call: %v", err)
+		log.Printf("rest GetUserFavMealByUserId failed on user meal repository call: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
 		return
 	}
 	defer rows.Close()
 
-	var foods []models.Food
+	var meals []models.Meal
 
 	// Iterate through the result set and scan each row into a User model
 	for rows.Next() {
-		var food models.Food
-		if err := rows.Scan(&food.Id, &food.Name, &food.Energy, &food.Protein, &food.Carbohydrate, &food.Fat,
-			&food.Sodium, &food.Cholesterol, &food.CreatedAt, &food.UpdatedAt); err != nil {
-			log.Printf("rest GetUserFavFoodByUserId failed on row scan: %v", err)
+		var meal models.Meal
+		if err := rows.Scan(&meal.Id, &meal.Name, &meal.Energy, &meal.Protein, &meal.Carbohydrate, &meal.Fat,
+			&meal.Sodium, &meal.Cholesterol, &meal.CreatedAt, &meal.UpdatedAt); err != nil {
+			log.Printf("rest GetUserFavMealByUserId failed on row scan: %v", err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
 			return
 		}
 
-		foods = append(foods, food)
+		meals = append(meals, meal)
 	}
 
 	// Check for errors during iteration
 	if err := rows.Err(); err != nil {
-		log.Printf("rest GetUserFavFoodByUserId failed query rows: %v", err)
+		log.Printf("rest GetUserFavMealByUserId failed query rows: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, foods)
+	ctx.JSON(http.StatusOK, meals)
 	return
 }

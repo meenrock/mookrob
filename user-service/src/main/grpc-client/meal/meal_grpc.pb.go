@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MealClient interface {
-	GetUserFavFood(ctx context.Context, in *GetUserFavFoodRequest, opts ...grpc.CallOption) (Meal_GetUserFavFoodClient, error)
+	GetUserFavMeal(ctx context.Context, in *GetUserFavMealRequest, opts ...grpc.CallOption) (Meal_GetUserFavMealClient, error)
 }
 
 type mealClient struct {
@@ -33,12 +33,12 @@ func NewMealClient(cc grpc.ClientConnInterface) MealClient {
 	return &mealClient{cc}
 }
 
-func (c *mealClient) GetUserFavFood(ctx context.Context, in *GetUserFavFoodRequest, opts ...grpc.CallOption) (Meal_GetUserFavFoodClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Meal_ServiceDesc.Streams[0], "/meal.Meal/GetUserFavFood", opts...)
+func (c *mealClient) GetUserFavMeal(ctx context.Context, in *GetUserFavMealRequest, opts ...grpc.CallOption) (Meal_GetUserFavMealClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Meal_ServiceDesc.Streams[0], "/protomeal.Meal/GetUserFavMeal", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &mealGetUserFavFoodClient{stream}
+	x := &mealGetUserFavMealClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -48,17 +48,17 @@ func (c *mealClient) GetUserFavFood(ctx context.Context, in *GetUserFavFoodReque
 	return x, nil
 }
 
-type Meal_GetUserFavFoodClient interface {
-	Recv() (*FoodItem, error)
+type Meal_GetUserFavMealClient interface {
+	Recv() (*MealItem, error)
 	grpc.ClientStream
 }
 
-type mealGetUserFavFoodClient struct {
+type mealGetUserFavMealClient struct {
 	grpc.ClientStream
 }
 
-func (x *mealGetUserFavFoodClient) Recv() (*FoodItem, error) {
-	m := new(FoodItem)
+func (x *mealGetUserFavMealClient) Recv() (*MealItem, error) {
+	m := new(MealItem)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (x *mealGetUserFavFoodClient) Recv() (*FoodItem, error) {
 // All implementations must embed UnimplementedMealServer
 // for forward compatibility
 type MealServer interface {
-	GetUserFavFood(*GetUserFavFoodRequest, Meal_GetUserFavFoodServer) error
+	GetUserFavMeal(*GetUserFavMealRequest, Meal_GetUserFavMealServer) error
 	// mustEmbedUnimplementedMealServer()
 }
 
@@ -77,8 +77,8 @@ type MealServer interface {
 type UnimplementedMealServer struct {
 }
 
-func (UnimplementedMealServer) GetUserFavFood(*GetUserFavFoodRequest, Meal_GetUserFavFoodServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetUserFavFood not implemented")
+func (UnimplementedMealServer) GetUserFavMeal(*GetUserFavMealRequest, Meal_GetUserFavMealServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetUserFavMeal not implemented")
 }
 func (UnimplementedMealServer) mustEmbedUnimplementedMealServer() {}
 
@@ -93,24 +93,24 @@ func RegisterMealServer(s grpc.ServiceRegistrar, srv MealServer) {
 	s.RegisterService(&Meal_ServiceDesc, srv)
 }
 
-func _Meal_GetUserFavFood_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetUserFavFoodRequest)
+func _Meal_GetUserFavMeal_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetUserFavMealRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(MealServer).GetUserFavFood(m, &mealGetUserFavFoodServer{stream})
+	return srv.(MealServer).GetUserFavMeal(m, &mealGetUserFavMealServer{stream})
 }
 
-type Meal_GetUserFavFoodServer interface {
-	Send(*FoodItem) error
+type Meal_GetUserFavMealServer interface {
+	Send(*MealItem) error
 	grpc.ServerStream
 }
 
-type mealGetUserFavFoodServer struct {
+type mealGetUserFavMealServer struct {
 	grpc.ServerStream
 }
 
-func (x *mealGetUserFavFoodServer) Send(m *FoodItem) error {
+func (x *mealGetUserFavMealServer) Send(m *MealItem) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -118,13 +118,13 @@ func (x *mealGetUserFavFoodServer) Send(m *FoodItem) error {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Meal_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "meal.Meal",
+	ServiceName: "protomeal.Meal",
 	HandlerType: (*MealServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetUserFavFood",
-			Handler:       _Meal_GetUserFavFood_Handler,
+			StreamName:    "GetUserFavMeal",
+			Handler:       _Meal_GetUserFavMeal_Handler,
 			ServerStreams: true,
 		},
 	},

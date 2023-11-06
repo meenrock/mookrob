@@ -5,20 +5,20 @@ package protomeal;
 option go_package = "github.com/mookrob/servicemeal";
 
 service Meal {
-    rpc GetUserFavFood (GetUserFavFoodRequest) returns (stream FoodItem) {}
+    rpc GetUserFavMeal (GetUserFavMealRequest) returns (stream MealItem) {}
 }
 
 message Empty{}
 
-message GetUserFavFoodRequest {
+message GetUserFavMealRequest {
     string id=1;
 }
 
-message FoodItem {
+message MealItem {
     string id = 1;
     string name = 2;
     double energy = 3;
-    double protien = 4;
+    double protein = 4;
     double carbohydrate = 5;
     double fat = 6;
     double sodium = 7;
