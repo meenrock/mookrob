@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/mookrob/serviceauth/main/enums"
@@ -27,8 +28,8 @@ func (r *AuthenticationRepository) CreateAuthenticationUser(authData models.Auth
 		"role, "+
 		"created_at, "+
 		"updated_at "+
-		") VALUES ($1, $2, $3, $4, $5, now(), now()) RETURNING id", enums.ACTIVE, authData.Username, authData.Password, authData.UserId,
-		constants.GENERAL_USER).Scan(&id)
+		") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", enums.ACTIVE, authData.Username, authData.Password, authData.UserId,
+		constants.GENERAL_USER, time.Now(), time.Now()).Scan(&id)
 
 	if err != nil {
 		return nil, err

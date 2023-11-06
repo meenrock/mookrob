@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"time"
 
 	enums "github.com/mookrob/serviceuser/main/enums"
 	"github.com/mookrob/serviceuser/main/models"
@@ -33,8 +34,8 @@ func (r *UserRepository) CreateUser(user models.User) (*uuid.UUID, error) {
 		"expected_bmi, "+
 		"created_at, "+
 		"updated_at "+
-		") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now()) RETURNING id", enums.ACTIVE, user.FirstName, user.LastName, user.NickName,
-		user.PhoneNumber, user.Email, user.Gender, user.Age, user.Height, user.Weight, user.ExpectedBmi).Scan(&id)
+		") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id", enums.ACTIVE, user.FirstName, user.LastName, user.NickName,
+		user.PhoneNumber, user.Email, user.Gender, user.Age, user.Height, user.Weight, user.ExpectedBmi, time.Now(), time.Now()).Scan(&id)
 
 	if err != nil {
 		return nil, err

@@ -51,6 +51,7 @@ func main() {
 
 	// create instances of services and controllers
 	userMealRepository := repositories.NewUserMealRepository(db)
+	mealRepository := repositories.NewMealRepository(db)
 
 	// run async?? server
 	go func() {
@@ -72,6 +73,9 @@ func main() {
 	go func() {
 		userMealRestService := rest_services.NewUserMealRestService(userMealRepository)
 		routers.SetUserMealRoutes(gin_engine, userMealRestService)
+
+		mealRestService := rest_services.NewMealRestService(mealRepository)
+		routers.SetMealRoutes(gin_engine, mealRestService)
 
 		// Start the server
 		rest_port := fmt.Sprintf(":%v", REST_PORT)
