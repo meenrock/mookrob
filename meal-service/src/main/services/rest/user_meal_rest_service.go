@@ -31,7 +31,7 @@ type UserFavMealResponse struct {
 
 func (s *UserMealRestService) GetUserFavMealByUserId(ctx *gin.Context) {
 	userDataRaw, exist := ctx.Get("userData")
-	if exist != true {
+	if !exist {
 		log.Printf("rest GetUserFavMealByUserId failed parse userData")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
@@ -73,5 +73,4 @@ func (s *UserMealRestService) GetUserFavMealByUserId(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, meals)
-	return
 }

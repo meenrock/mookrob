@@ -1,4 +1,4 @@
-ALTER TABLE food RENAME TO meal;
+ALTER TABLE food RENAME TO meals;
 ALTER TABLE user_food RENAME TO user_meal;
 
 ALTER TABLE user_meal RENAME COLUMN food_id TO meal_id;

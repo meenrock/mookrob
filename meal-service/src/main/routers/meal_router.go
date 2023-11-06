@@ -12,5 +12,6 @@ func SetMealRoutes(router *gin.Engine, ctrls *services.MealRestService) {
 	mealRoutes := router.Group("/api/meal")
 	{
 		mealRoutes.POST("/create", authentication.AuthMiddleware(constants.ADMIN), ctrls.CreateMeal)
+		mealRoutes.GET("/", authentication.AuthMiddleware(constants.ADMIN), ctrls.GetMealList)
 	}
 }
