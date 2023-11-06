@@ -7,7 +7,9 @@ import (
 	"net/http"
 
 	enums "github.com/mookrob/serviceuser/main/enums"
-	pb "github.com/mookrob/serviceuser/main/grpc-client/meal"
+	pb_auth "github.com/mookrob/serviceuser/main/grpc-client/auth"
+	pb_meal "github.com/mookrob/serviceuser/main/grpc-client/meal"
+	models "github.com/mookrob/serviceuser/main/models"
 	repositories "github.com/mookrob/serviceuser/main/repositories"
 	utils "github.com/mookrob/shared/utils"
 
@@ -21,13 +23,101 @@ import (
 type UserRestService struct {
 	UserRepository *repositories.UserRepository
 	mealGrpcHost   string
+	authGrpcHost   string
 }
 
 func NewUserRestService(r *repositories.UserRepository) *UserRestService {
 
 	MEAL_GRPC_HOST := viper.GetString("client.meal-grpc-host")
+	AUTH_GRPC_HOST := viper.GetString("client.auth-grpc-host")
 
-	return &UserRestService{UserRepository: r, mealGrpcHost: MEAL_GRPC_HOST}
+	return &UserRestService{UserRepository: r, mealGrpcHost: MEAL_GRPC_HOST, authGrpcHost: AUTH_GRPC_HOST}
+}
+
+// CreateUser request model
+type CreateUserRequest struct {
+	FirstName   string   `json:"first_name" binding:"required"`
+	LastName    string   `json:"last_name" binding:"required"`
+	NickName    string   `json:"nick_name" binding:"required"`
+	PhoneNumber *string  `json:"phone_number"`
+	Email       string   `json:"email" binding:"required,email"`
+	Gender      string   `json:"gender" binding:"required"`
+	Age         int64    `json:"age" binding:"required"`
+	Height      float64  `json:"height" binding:"required"`
+	Weight      float64  `json:"weight" binding:"required"`
+	ExpectedBmi *float64 `json:"expected_bmi"`
+	Password    string   `json:"password" binding:"required"`
+}
+
+func (s *UserRestService) CreateUser(ctx *gin.Context) {
+
+	var request CreateUserRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		log.Println("rest CreateUser: error on parse request: ", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	exist, err := s.UserRepository.ExistByEmail(request.Email)
+	if err != nil {
+		log.Println("rest CreateUser: error on query exist by mail: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+	if exist == true {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email already exist"})
+		return
+	}
+
+	conn, err := grpc.Dial(s.authGrpcHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Println("rest CreateUser: failed to connect auth server: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+	defer conn.Close()
+
+	// define auth client
+	authCon := pb_auth.NewAuthClient(conn)
+
+	// create user
+	newUser := models.User{
+		FirstName:   request.FirstName,
+		LastName:    request.LastName,
+		NickName:    request.NickName,
+		PhoneNumber: request.PhoneNumber,
+		Email:       request.Email,
+		Gender:      request.Gender,
+		Age:         request.Age,
+		Height:      request.Height,
+		Weight:      request.Weight,
+		ExpectedBmi: request.ExpectedBmi,
+	}
+	newUserId, err := s.UserRepository.CreateUser(newUser)
+	if err != nil {
+		log.Println("rest GetUserById: failed on user repository call: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	// build CreateAuthUser request
+	authReq := &pb_auth.CreateAuthUserRequest{
+		Username: request.Email,
+		Password: request.Password,
+		UserId:   newUserId.String(),
+	}
+
+	// create auth user
+	authRes, err := authCon.CreateAuthUser(context.Background(), authReq)
+	if err != nil {
+		log.Println("rest CreateUser: could not create authentication user: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	// TODO:: calculate bmi
+
+	ctx.JSON(http.StatusOK, gin.H{"role": authRes.Role, "username": authRes.Username})
 }
 
 // GetUserById response model
@@ -42,7 +132,7 @@ type UserDetailResponse struct {
 func (s *UserRestService) GetUserById(ctx *gin.Context) {
 	userDataRaw, exist := ctx.Get("userData")
 	if exist != true {
-		log.Printf("rest GetUserFavFoodByUserId failed parse userData")
+		log.Println("rest GetUserById: failed parse userData")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
 	}
@@ -55,7 +145,7 @@ func (s *UserRestService) GetUserById(ctx *gin.Context) {
 	// call repo
 	user, err := s.UserRepository.GetUserById(userData.UserId)
 	if err != nil {
-		log.Printf("GetUserById failed on user repository call: %v", err)
+		log.Println("rest GetUserById: failed on user repository call: ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
 		return
 	}
@@ -87,7 +177,7 @@ type UserFavFoodResponse struct {
 func (s *UserRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
 	userDataRaw, exist := ctx.Get("userData")
 	if exist != true {
-		log.Printf("rest GetUserFavFoodByUserId failed parse userData")
+		log.Println("rest GetUserFavFoodByUserId: failed parse userData")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
 	}
@@ -100,24 +190,24 @@ func (s *UserRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
 	// connect meal service
 	conn, err := grpc.Dial(s.mealGrpcHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Printf("rest GetUserFavFoodByUserId failed to connect meal server: %v", err)
+		log.Println("rest GetUserFavFoodByUserId: failed to connect meal server: ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
 		return
 	}
 	defer conn.Close()
 
 	// define meal client
-	mealCon := pb.NewMealClient(conn)
+	mealCon := pb_meal.NewMealClient(conn)
 
 	// build GetUserFavFood request
-	req := &pb.GetUserFavFoodRequest{
+	req := &pb_meal.GetUserFavFoodRequest{
 		Id: userData.UserId.String(),
 	}
 
 	// send grpc request
 	stream, err := mealCon.GetUserFavFood(context.Background(), req)
 	if err != nil {
-		log.Printf("rest GetUserFavFoodByUserId failed RPC: %v", err)
+		log.Println("rest GetUserFavFoodByUserId: failed RPC: ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
 		return
 	}
@@ -131,7 +221,7 @@ func (s *UserRestService) GetUserFavFoodByUserId(ctx *gin.Context) {
 			break
 		}
 		if err != nil {
-			log.Printf("rest GetUserFavFoodByUserId failed RPC meal stream: %v", err)
+			log.Println("rest GetUserFavFoodByUserId: failed RPC meal stream: ", err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
 			return
 		}

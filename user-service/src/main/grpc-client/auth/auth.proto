@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package protoauth;
+
+option go_package = "github.com/mookrob/serviceauth";
+
+service Auth {
+    rpc CreateAuthUser (CreateAuthUserRequest) returns (CreateAuthUserResponse) {}
+}
+
+message Empty{}
+
+message CreateAuthUserRequest {
+    string username=1;
+    string password=2;
+    string user_id=3;
+}
+
+message CreateAuthUserResponse {
+    string role = 1;
+    string username = 2;
+}

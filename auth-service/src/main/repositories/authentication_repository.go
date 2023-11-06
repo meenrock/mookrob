@@ -3,7 +3,10 @@ package repositories
 import (
 	"database/sql"
 
+	"github.com/google/uuid"
+	"github.com/mookrob/serviceauth/main/enums"
 	"github.com/mookrob/serviceauth/main/models"
+	"github.com/mookrob/shared/constants"
 )
 
 type AuthenticationRepository struct {
@@ -12,6 +15,26 @@ type AuthenticationRepository struct {
 
 func NewAuthenticationRepository(db *sql.DB) *AuthenticationRepository {
 	return &AuthenticationRepository{DB: db}
+}
+
+func (r *AuthenticationRepository) CreateAuthenticationUser(authData models.AuthenticationData) (*uuid.UUID, error) {
+	var id uuid.UUID
+	err := r.DB.QueryRow("INSERT INTO authentication_data ("+
+		"status, "+
+		"username, "+
+		"password, "+
+		"user_id, "+
+		"role, "+
+		"created_at, "+
+		"updated_at "+
+		") VALUES ($1, $2, $3, $4, $5, now(), now()) RETURNING id", enums.ACTIVE, authData.Username, authData.Password, authData.UserId,
+		constants.GENERAL_USER).Scan(&id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &id, nil
 }
 
 func (r *AuthenticationRepository) GetAuthenticationByUsernameAndStatusActive(username string) (models.AuthenticationData, error) {

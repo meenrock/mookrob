@@ -1,4 +1,4 @@
-package services
+package rest_services
 
 import (
 	"log"
@@ -22,13 +22,13 @@ type AuthenticationRestService struct {
 	AuthenticationRepository *repositories.AuthenticationRepository
 }
 
-func NewUserRestService(r *repositories.AuthenticationRepository) *AuthenticationRestService {
+func NewAuthenticationRestService(r *repositories.AuthenticationRepository) *AuthenticationRestService {
 	jwtKey = []byte(viper.GetString("jwt.secret_key"))
 	refreshKey = []byte(viper.GetString("jwt.refresh_key"))
 	return &AuthenticationRestService{AuthenticationRepository: r}
 }
 
-// Login response model
+// Login request model
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -52,7 +52,7 @@ func (s *AuthenticationRestService) Login(ctx *gin.Context) {
 	// call repo
 	auth, err := s.AuthenticationRepository.GetAuthenticationByUsernameAndStatusActive(request.Username)
 	if err != nil {
-		log.Printf("Login: Failed on user repository call: %v", err)
+		log.Println("Login: Failed on user repository call: ", err)
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "username not found."})
 		return
 	}
