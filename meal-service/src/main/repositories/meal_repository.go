@@ -82,3 +82,23 @@ func (r *MealRepository) GetMealList(queryString string, page int, pageSize int)
 
 	return rows, nil
 }
+
+func (r *MealRepository) EditMeal(meal models.Meal) error {
+	_, err := r.DB.Exec("UPDATE meals SET "+
+		"name = $1, "+
+		"energy = $2, "+
+		"protein = $3, "+
+		"carbohydrate = $4, "+
+		"fat = $5, "+
+		"sodium = $6, "+
+		"cholesterol = $7, "+
+		"updated_at = $8 "+
+		"WHERE id = $9", meal.Name, meal.Energy, meal.Protein, meal.Carbohydrate,
+		meal.Fat, meal.Sodium, meal.Cholesterol, time.Now(), meal.Id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

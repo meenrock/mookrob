@@ -50,7 +50,7 @@ func (s *MealRestService) CreateMeal(ctx *gin.Context) {
 	}
 	err := s.MealRepository.CreateMeal(newMeal)
 	if err != nil {
-		log.Println("rest GetUserById: failed on user repository call: ", err)
+		log.Println("rest CreateMeal: failed on user repository call: ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
 		return
 	}
@@ -114,4 +114,45 @@ func (s *MealRestService) GetMealList(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data_list": meals, "page": request.Page, "page_size": request.PageSize})
+}
+
+// EditMeal request model
+type EditMealRequest struct {
+	Id           uuid.UUID `json:"id" binding:"required"`
+	Name         string    `json:"name" binding:"required"`
+	Energy       float64   `json:"energy" binding:"required"`
+	Protein      *float64  `json:"protein"`
+	Carbohydrate *float64  `json:"carbohydrate"`
+	Fat          *float64  `json:"fat"`
+	Sodium       *float64  `json:"sodium"`
+	Cholesterol  *float64  `json:"cholesterol"`
+}
+
+func (s *MealRestService) EditMeal(ctx *gin.Context) {
+	var request EditMealRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		log.Println("rest EditMeal: error on parse request: ", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// edit meal
+	editMeal := models.Meal{
+		Id:           request.Id,
+		Name:         request.Name,
+		Energy:       request.Energy,
+		Protein:      request.Protein,
+		Carbohydrate: request.Carbohydrate,
+		Fat:          request.Fat,
+		Sodium:       request.Sodium,
+		Cholesterol:  request.Cholesterol,
+	}
+	err := s.MealRepository.EditMeal(editMeal)
+	if err != nil {
+		log.Println("rest EditMeal: failed on user repository call: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "Success"})
 }
