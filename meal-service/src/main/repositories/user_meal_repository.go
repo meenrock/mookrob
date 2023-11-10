@@ -2,6 +2,9 @@ package repositories
 
 import (
 	"database/sql"
+	"time"
+
+	"github.com/mookrob/servicemeal/main/models"
 
 	"github.com/google/uuid"
 )
@@ -35,4 +38,22 @@ func (r *UserMealRepository) GetUserFavMealByUserId(id uuid.UUID) (*sql.Rows, er
 	}
 
 	return rows, nil
+}
+
+func (r *UserMealRepository) CreateDailyUserMeal(dailyUserMeal models.DailyUserMeal) error {
+	_, err := r.DB.Exec("INSERT INTO daily_user_meal ("+
+		"meal_id, "+
+		"user_id, "+
+		"meal_time, "+
+		"date, "+
+		"created_at, "+
+		"updated_at "+
+		") VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", dailyUserMeal.MealId, dailyUserMeal.UserId, dailyUserMeal.MealTime,
+		dailyUserMeal.Date, time.Now(), time.Now())
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

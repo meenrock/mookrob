@@ -3,11 +3,15 @@ package rest_services
 import (
 	"log"
 	"net/http"
+	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/mookrob/servicemeal/main/enums"
 	"github.com/mookrob/servicemeal/main/models"
 	"github.com/mookrob/servicemeal/main/repositories"
 	"github.com/mookrob/shared/utils"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type UserMealRestService struct {
@@ -73,4 +77,47 @@ func (s *UserMealRestService) GetUserFavMealByUserId(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, meals)
+}
+
+type CreateDailyUserMealRequest struct {
+	MealId   uuid.UUID      `json:"meal_id" binding:"required"`
+	MealTime enums.MealTime `json:"meal_time" binding:"required"`
+}
+
+func (s *UserMealRestService) CreateDailyUserMeal(ctx *gin.Context) {
+	var request CreateDailyUserMealRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		log.Println("rest CreateDailyUserMeal: error on parse request: ", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userDataRaw, exist := ctx.Get("userData")
+	if !exist {
+		log.Println("rest CreateDailyUserMeal: failed parse userData")
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+		return
+	}
+
+	userData, ok := utils.ExtractUserData(userDataRaw)
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+	}
+
+	// create daily user meal
+	newDailyUserMeal := models.DailyUserMeal{
+		MealId:   request.MealId,
+		UserId:   userData.UserId,
+		MealTime: request.MealTime,
+		Date:     time.Now(),
+	}
+
+	err := s.UserMealRepository.CreateDailyUserMeal(newDailyUserMeal)
+	if err != nil {
+		log.Println("rest CreateDailyUserMeal: failed on user meal repository call: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "Success"})
 }

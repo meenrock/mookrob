@@ -9,8 +9,10 @@ import (
 )
 
 func SetUserMealRoutes(router *gin.Engine, ctrls *services.UserMealRestService) {
-	userRoutes := router.Group("/api/meal/user-meal")
+	userMealRoutes := router.Group("/api/meal/user-meal")
 	{
-		userRoutes.GET("/fav", authentication.AuthMiddleware(constants.GENERAL_USER), ctrls.GetUserFavMealByUserId)
+		userMealRoutes.GET("/fav-list", authentication.AuthMiddleware(constants.GENERAL_USER), ctrls.GetUserFavMealByUserId)
+
+		userMealRoutes.POST("/create-daily", authentication.AuthMiddleware(constants.GENERAL_USER), ctrls.CreateDailyUserMeal)
 	}
 }
