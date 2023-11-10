@@ -30,7 +30,7 @@ func (r *UserMealRepository) GetUserFavMealByUserId(id uuid.UUID) (*sql.Rows, er
 		"m.created_at, "+
 		"m.updated_at "+
 		"FROM user_meal um "+
-		"inner join meal m on um.meal_id = m.id "+
+		"inner join meals m on um.meal_id = m.id "+
 		"WHERE um.user_id = $1 and um.user_meal_type = 'LIKE'", id)
 
 	if err != nil {
@@ -48,7 +48,7 @@ func (r *UserMealRepository) CreateDailyUserMeal(dailyUserMeal models.DailyUserM
 		"date, "+
 		"created_at, "+
 		"updated_at "+
-		") VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", dailyUserMeal.MealId, dailyUserMeal.UserId, dailyUserMeal.MealTime,
+		") VALUES ($1, $2, $3, $4, $5, $6)", dailyUserMeal.MealId, dailyUserMeal.UserId, dailyUserMeal.MealTime,
 		dailyUserMeal.Date, time.Now(), time.Now())
 
 	if err != nil {
@@ -56,4 +56,29 @@ func (r *UserMealRepository) CreateDailyUserMeal(dailyUserMeal models.DailyUserM
 	}
 
 	return nil
+}
+
+func (r *UserMealRepository) GetDailyUserMealByUserIdAndDate(id uuid.UUID, date time.Time) (*sql.Rows, error) {
+	rows, err := r.DB.Query("SELECT "+
+		"m.id, "+
+		"m.name, "+
+		"m.energy, "+
+		"m.protein, "+
+		"m.carbohydrate, "+
+		"m.fat, "+
+		"m.sodium, "+
+		"m.cholesterol, "+
+		"m.created_at, "+
+		"m.updated_at, "+
+		"dm.meal_time, "+
+		"dm.date "+
+		"FROM daily_user_meal dm "+
+		"inner join meals m on dm.meal_id = m.id "+
+		"WHERE dm.user_id = $1 and dm.date = $2", id, date.Format("2006-01-02"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
 }
