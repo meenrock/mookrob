@@ -148,7 +148,6 @@ func (s *UserMealRestService) GetDailyUserMeal(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 	}
 
-	log.Println("rest GetDailyUserMeal failed on user meal repository call: ", time.Now())
 	rows, err := s.UserMealRepository.GetDailyUserMealByUserIdAndDate(userData.UserId, time.Now())
 	if err != nil {
 		log.Println("rest GetDailyUserMeal failed on user meal repository call: ", err)
