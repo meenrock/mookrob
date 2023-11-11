@@ -5,11 +5,17 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mookrob/servicecalculator/main/repositories"
+
 	// pub "github.com/mookrob/serviceuser/main/queue"
 	// repositories "github.com/mookrob/serviceuser/main/repositories"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
 )
+
+type UserCalculatorService struct {
+	UserCalculatorRepository *repositories.UserCalculatorRepository
+}
 
 func PublishUserInfo(ctx *gin.Context) {
 	// conn, ch := CreateRabbitMQConnection()
@@ -51,4 +57,8 @@ func CreateRabbitMQConnection() (*amqp.Connection, *amqp.Channel) {
 	failOnError(err, "Failed to open a channel")
 
 	return conn, ch
+}
+
+func (s *UserCalculatorService) ProduceUserInformationMessage(ctx *gin.Context) {
+
 }
