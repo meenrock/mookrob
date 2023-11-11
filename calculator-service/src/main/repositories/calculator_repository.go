@@ -1,7 +1,11 @@
 package repositories
 
 import (
+	"context"
 	"database/sql"
+
+	"go.mongodb.org/mongo-driver/bson"
+	coll "go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/google/uuid"
 )
@@ -35,4 +39,19 @@ func (r *UserCalculatorRepository) GetUserCalculationByUserId(id uuid.UUID) (*sq
 	}
 
 	return rows, nil
+}
+
+func (r *UserCalculatorRepository) AddUserParameter(id uuid.UUID) {
+	result, err := coll.InsertOne(
+		context.TODO(),
+		bson.D{
+			{"item", "canvas"},
+			{"qty", 100},
+			{"tags", bson.A{"cotton"}},
+			{"size", bson.D{
+				{"h", 28},
+				{"w", 35.5},
+				{"uom", "cm"},
+			}},
+		})
 }
