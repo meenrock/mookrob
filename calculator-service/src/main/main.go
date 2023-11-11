@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -14,6 +15,8 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
@@ -36,6 +39,10 @@ func main() {
 	DB_USER := viper.GetString("database.user")
 	DB_PASSWORD := viper.GetString("database.password")
 	PORT := viper.GetString("server.rest-port")
+	MONGO_HOST := viper.GetString("mongo.host")
+	MONGO_PORT := viper.GetString("mongo.port")
+	MONGO_USER := viper.GetString("mongo.user")
+	MONGO_PASSWORD := viper.GetString("mongo.password")
 
 	// connect postgres
 	psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
@@ -48,6 +55,16 @@ func main() {
 	calculatorRepository := repositories.NewUserCalculatorRepository(db)
 	// userService := services.NewUserService(userRepository)
 	// routers.SetUserRoutes(r, userService)
+	mongoInfo := fmt.Sprintf("mongodb://%s:%s@%s:%s", MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT)
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoInfo))
+	if err != nil {
+		panic(err)
+	}
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		fmt.Println("Error pinging MongoDB:", err)
+		return
+	}
 
 	go func() {
 		// Start the server
