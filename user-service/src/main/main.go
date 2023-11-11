@@ -45,13 +45,18 @@ func main() {
 	// create instances of services and controllers
 	userRepository := repositories.NewUserRepository(db)
 
-	userRestService := rest_services.NewUserRestService(userRepository)
-	routers.SetUserRoutes(gin_engine, userRestService)
+	go func() {
+		userRestService := rest_services.NewUserRestService(userRepository)
+		routers.SetUserRoutes(gin_engine, userRestService)
 
-	// Start the server
-	port := fmt.Sprintf(":%v", REST_PORT)
-	fmt.Println("Server Running on Port", REST_PORT)
-	if err := gin_engine.Run(port); err != nil {
-		log.Fatal(err)
-	}
+		// Start the server
+		port := fmt.Sprintf(":%v", REST_PORT)
+		fmt.Println("Server Running on Port", REST_PORT)
+		if err := gin_engine.Run(port); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	select {}
+
 }
