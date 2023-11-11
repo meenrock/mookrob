@@ -17,7 +17,7 @@ type UserBodyData struct {
 	UpdatedAt     time.Time `bson:"updated_at"`
 }
 
-type User struct {
+type UserParameter struct {
 	Id          uuid.UUID
 	Status      enums.Status
 	FirstName   string
