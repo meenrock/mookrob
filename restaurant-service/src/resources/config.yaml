@@ -1,4 +1,10 @@
 env: local
 
 server:
-  port: 8083
+  port: 8084
+
+jwt:
+  secret_key: fsdfk&wq#452!dsd
+  
+google:
+  api-key: "AIzaSyD1T-WZxo0qHDTEexvV-CWJg0nLFRz5nDM"
