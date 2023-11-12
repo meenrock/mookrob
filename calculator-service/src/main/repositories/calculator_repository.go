@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"log"
 	"net/http"
 
 	// "go.mongodb.org/mongo-driver/bson"
@@ -25,41 +26,38 @@ func NewUserCalculatorRepository(db *sql.DB) *UserCalculatorRepository {
 	return &UserCalculatorRepository{DB: db}
 }
 
-func (r *UserCalculatorRepository) GetUserCalculationByUserId(id uuid.UUID) (*sql.Rows, error) {
-	coll := ConnectMongoDB().Database(db_name).Collection(collection)
+func (r *UserCalculatorRepository) GetUserCalculationByUserId(id uuid.UUID) (mongo.InsertOneResult, error) {
+	coll := ConnectMongoDB().Database("db_name").Collection("collection")
 	result, err := coll.InsertOne(
 		context.TODO(),
-		bson.D{
-			{"item", "canvas"},
-			{"qty", 100},
-			{"tags", bson.A{"cotton"}},
-			{"size", bson.D{
-				{"h", 28},
-				{"w", 35.5},
-				{"uom", "cm"},
-			}},
-		})
+		bson.D{})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal.", "detailed": err})
+		log.Fatal("Error finding document:", err)
+		return *result, err
 	}
 
-	return rows, nil
+	return *result, nil
+}
+
+func (r *UserCalculatorRepository) GetUserCalculationBMI(id uuid.UUID) (mongo.SingleResult, error) {
+	coll := ConnectMongoDB().Database("db_name").Collection("collection")
+
+	filter := bson.D{{}}
+
+	result := coll.FindOne(context.Background(), filter)
+	if result.Err() != nil {
+		log.Fatal("Error finding document:", result.Err())
+		return mongo.SingleResult{}, result.Err()
+	}
+
+	return *result, nil
 }
 
 func (r *UserCalculatorRepositoryMongo) AddParameter(id uuid.UUID, collection string, db_name string, ctx *gin.Context) {
 	coll := ConnectMongoDB().Database(db_name).Collection(collection)
 	result, err := coll.InsertOne(
 		context.TODO(),
-		bson.D{
-			{"item", "canvas"},
-			{"qty", 100},
-			{"tags", bson.A{"cotton"}},
-			{"size", bson.D{
-				{"h", 28},
-				{"w", 35.5},
-				{"uom", "cm"},
-			}},
-		})
+		bson.D{})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal.", "detailed": err})
 	}
