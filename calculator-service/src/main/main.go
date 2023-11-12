@@ -50,6 +50,10 @@ func main() {
 	// routers.SetUserRoutes(r, userService)
 
 	go func() {
+		repositories.ConnectMongoDB()
+	}()
+
+	go func() {
 		// Start the server
 
 		userCalculatorService := rest_services.NewUserCalculatorRestService(calculatorRepository)

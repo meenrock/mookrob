@@ -1,1 +1,31 @@
 env: local
+
+server:
+  rest-port: 8084
+  grpc-port: 50052
+
+database_home:
+  host: 192.168.1.196
+  port: 5432
+  name: mookrob
+  user: meendev
+  password: meenmook
+
+database:
+  host: localhost
+  port: 5432
+  name: mookrob
+  user: meendev
+  password: meenmook
+
+rabbitmq:
+  host: 192.168.1.187
+  port: 5672
+  user: meendev
+  password: meen
+
+mongo:
+  host: cluster0.eozr4.mongodb.net/?retryWrites=true&w=majority
+  port:
+  user: meen
+  password: nova
