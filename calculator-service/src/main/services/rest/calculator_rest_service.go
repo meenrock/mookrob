@@ -19,3 +19,7 @@ func (s *UserCalculatorService) GetUserCalculationByUserId(ctx *gin.Context) {
 	defer conn.Close()
 	defer ch.Close()
 }
+
+func (s *UserCalculatorService) CalculateUserParameter(ctx *gin.Context) {
+
+}

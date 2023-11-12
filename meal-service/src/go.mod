@@ -1,6 +1,6 @@
 module github.com/mookrob/servicemeal
 
-go 1.21.1
+go 1.21
 
 require (
 	github.com/gin-gonic/gin v1.9.1

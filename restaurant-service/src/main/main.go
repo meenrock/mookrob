@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	routers "github.com/mookrob/servicerestaurant/main/routers"
+	rest_services "github.com/mookrob/servicerestaurant/main/services/rest"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/viper"
@@ -21,25 +24,11 @@ func main() {
 		return
 	}
 
-	// DB connection
-	// DB_HOST := viper.GetString("database.host")
-	// DB_PORT := viper.GetString("database.port")
-	// DB_NAME := viper.GetString("database.name")
-	// DB_USER := viper.GetString("database.user")
-	// DB_PASSWORD := viper.GetString("database.password")
 	PORT := viper.GetString("server.port")
 
-	// // connect postgres
-	// psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
-	// db, err := sql.Open("pgx", psqlInfo)
-	// if err != nil {
-	// 	log.Fatalf("Error while reading config file %s", err)
-	// }
-
 	// create instances of services and controllers
-	// userRepository := repositories.NewUserRepository(db)
-	// userService := services.NewUserService(userRepository)
-	// routers.SetUserRoutes(r, userService)
+	placeService := rest_services.NewPlaceRestService()
+	routers.SetPlaceRoutes(r, placeService)
 
 	// Start the server
 	port := fmt.Sprintf(":%v", PORT)
