@@ -22,7 +22,7 @@ var meals = []meal{
 }
 
 // Google Maps API key.
-const googleMapsAPIKey = "AIzaSyD1T-WZxo0qHDTEexvV-CWJg0nLFRz5nDM"
+const googleMapsAPIKey = "*"
 
 func main() {
 	router := gin.Default()
