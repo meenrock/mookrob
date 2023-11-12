@@ -1,0 +1,4 @@
+client, err := maps.NewClient(maps.APIKey("YOUR_API_KEY"))
+if err != nil {
+    log.Fatal(err)
+}

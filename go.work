@@ -1,9 +1,9 @@
-go 1.21
+go 1.21.3
 
 use (
-	./user-service/src
-	./meal-service/src
 	./auth-service/src
 	./calculator-service/src
+	./meal-service/src
 	./restaurant-service/src
+	./user-service/src
 )

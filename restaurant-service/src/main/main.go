@@ -1,50 +1,98 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"context"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/spf13/viper"
+	"googlemaps.github.io/maps"
 )
 
+// album represents data about a record album.
+type meal struct {
+	ID   string `json:"id"`
+	Menu string `json:"title"`
+}
+
+// albums slice to seed record album data.
+var meals = []meal{
+	{ID: "1", Menu: "Congee"},
+	{ID: "2", Menu: "Padthai"},
+	{ID: "3", Menu: "Noodle"},
+}
+
+// Google Maps API key.
+const googleMapsAPIKey = "AIzaSyD1T-WZxo0qHDTEexvV-CWJg0nLFRz5nDM"
+
 func main() {
-	r := gin.Default()
+	router := gin.Default()
+	router.GET("/meals", getMeal)
+	router.GET("/meals/:id", getMealByID)
+	router.POST("/meals", postMeal)
+	router.GET("/search", searchPlaces)
 
-	viper.SetConfigName("config") // Name of the config file (without extension)
-	viper.SetConfigType("yaml")   // Type of the config file (yaml, json, etc.)
-	viper.AddConfigPath("../resources/")
+	router.Run("localhost:8080")
+}
 
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("Error reading config file: %s\n", err)
+// getMeals responds with the list of all albums as JSON.
+func getMeal(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, meals)
+}
+
+// postAlbums adds an album from JSON received in the request body.
+func postMeal(c *gin.Context) {
+	var newMeal meal
+
+	// Call BindJSON to bind the received JSON to
+	// newAlbum.
+	if err := c.BindJSON(&newMeal); err != nil {
 		return
 	}
 
-	// DB connection
-	// DB_HOST := viper.GetString("database.host")
-	// DB_PORT := viper.GetString("database.port")
-	// DB_NAME := viper.GetString("database.name")
-	// DB_USER := viper.GetString("database.user")
-	// DB_PASSWORD := viper.GetString("database.password")
-	PORT := viper.GetString("server.port")
+	// Add the new album to the slice.
+	meals = append(meals, newMeal)
+	c.IndentedJSON(http.StatusCreated, newMeal)
+}
 
-	// // connect postgres
-	// psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
-	// db, err := sql.Open("pgx", psqlInfo)
-	// if err != nil {
-	// 	log.Fatalf("Error while reading config file %s", err)
-	// }
+// getAlbumByID locates the album whose ID value matches the id
+// parameter sent by the client, then returns that album as a response.
+func getMealByID(c *gin.Context) {
+	id := c.Param("id")
 
-	// create instances of services and controllers
-	// userRepository := repositories.NewUserRepository(db)
-	// userService := services.NewUserService(userRepository)
-	// routers.SetUserRoutes(r, userService)
-
-	// Start the server
-	port := fmt.Sprintf(":%v", PORT)
-	fmt.Println("Server Running on Port", port)
-	if err := r.Run(port); err != nil {
-		log.Fatal(err)
+	// Loop through the list of albums, looking for
+	// an album whose ID value matches the parameter.
+	for _, a := range meals {
+		if a.ID == id {
+			c.IndentedJSON(http.StatusOK, a)
+			return
+		}
 	}
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "meal not found"})
+}
+
+// searchPlaces searches for places on Google Maps using the input from GET.
+func searchPlaces(c *gin.Context) {
+	input := c.Query("input")
+
+	// Create a new Google Maps client.
+	client, err := maps.NewClient(maps.WithAPIKey(googleMapsAPIKey))
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Create a new text search request.
+	req := &maps.TextSearchRequest{
+		Query: input, // Set the Query field with the input from the request.
+	}
+
+	// Send the search request.
+	resp, err := client.TextSearch(context.Background(), req)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Return the found places to the client.
+	c.IndentedJSON(http.StatusOK, resp.Results)
 }

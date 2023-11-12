@@ -2,3 +2,6 @@ env: local
 
 server:
   port: 8083
+
+jwt:
+  google api key: "AIzaSyD1T-WZxo0qHDTEexvV-CWJg0nLFRz5nDM"
