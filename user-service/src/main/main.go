@@ -11,29 +11,31 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
 func main() {
-	gin_engine := gin.Default()
-	gin_engine.Use(gin.Recovery())
+	err := godotenv.Load("../resources/.env")
 
-	viper.SetConfigName("config") // Name of the config file (without extension)
-	viper.SetConfigType("yaml")   // Type of the config file (yaml, json, etc.)
-	viper.AddConfigPath("../resources/")
-
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("Error reading config file: %s\n", err)
+	if err != nil {
+		fmt.Println("Error loading .env file", err)
 		return
 	}
 
+	viper.AutomaticEnv()
+
 	// DB connection
-	DB_HOST := viper.GetString("database.host")
-	DB_PORT := viper.GetString("database.port")
-	DB_NAME := viper.GetString("database.name")
-	DB_USER := viper.GetString("database.user")
-	DB_PASSWORD := viper.GetString("database.password")
-	REST_PORT := viper.GetString("server.rest-port")
+	DB_HOST := viper.GetString("DB_HOST")
+	DB_PORT := viper.GetString("DB_PORT")
+	DB_NAME := viper.GetString("DB_NAME")
+	DB_USER := viper.GetString("DB_USERNAME")
+	DB_PASSWORD := viper.GetString("DB_PASSWORD")
+	REST_PORT := viper.GetString("REST_PORT")
+
+	gin_engine := gin.Default()
+	gin_engine.Use(gin.Recovery())
+	gin.SetMode(viper.GetString("GIN_MODE"))
 
 	// connect postgres
 	psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)

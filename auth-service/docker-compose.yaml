@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  auth-app:
+    environment:
+      ENV: "dev"
+      GIN_MODE: "release"
+      REST_PORT: "8080"
+      GRPC_PORT: "50050"
+      DB_HOST: "192.168.1.39"
+      DB_PORT: "5442"
+      DB_NAME: "authentication"
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: "postgres"
+      JWT_SECRET_KEY: "m345lko@okr&0b"
+      REFRESH_TOKEN: "m3!7lk8C9or&0b"
+    build:
+      context: ..
+      args:
+        - DB_HOST=192.168.1.39
+        - DB_PORT=5442
+        - DB_NAME=authentication
+        - DB_USERNAME=postgres
+        - DB_PASSWORD=postgres
+      dockerfile: /auth-service/Dockerfile
+    ports:
+      - "8083:8080"
+      - "50053:50050"

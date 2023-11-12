@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  user-app:
+    environment:
+      ENV: "dev"
+      GIN_MODE: "release"
+      REST_PORT: "8080"
+      GRPC_PORT: "50050"
+      DB_HOST: "192.168.1.39"
+      DB_PORT: "5440"
+      DB_NAME: "user"
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: "postgres"
+      CLIENT_MEAL_GRPC_HOST: "192.168.1.39:50052"
+      CLIENT_AUTH_GRPC_HOST: "192.168.1.39:50053"
+      JWT_SECRET_KEY: "m345lko@okr&0b"
+    build:
+      context: ..
+      args:
+        - DB_HOST=192.168.1.39
+        - DB_PORT=5440
+        - DB_NAME=user
+        - DB_USERNAME=postgres
+        - DB_PASSWORD=postgres
+      dockerfile: /user-service/Dockerfile
+    ports:
+      - "8081:8080"
+      - "50051:50050"
