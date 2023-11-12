@@ -10,6 +10,8 @@ import (
 	pb "github.com/mookrob/serviceuser/main/grpc-client/meal"
 	repositories "github.com/mookrob/serviceuser/main/repositories"
 
+	mqtt_services "github.com/mookrob/servicecalculator/main/services/mq"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
@@ -192,4 +194,10 @@ func (s *UserRestService) EditUserFavFoodByUserId(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, userFavResponse)
+}
+
+func (s *UserRestService) GetUserCalculationByUserId(ctx *gin.Context) {
+	conn, ch := mqtt_services.CreateRabbitMQConnection()
+	defer conn.Close()
+	defer ch.Close()
 }

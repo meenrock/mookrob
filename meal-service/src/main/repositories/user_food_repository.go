@@ -26,7 +26,7 @@ func (r *UserFoodRepository) GetUserFavFoodByUserId(id uuid.UUID) (*sql.Rows, er
 		"f.cholesterol, "+
 		"f.created_at, "+
 		"f.updated_at "+
-		"FROM user_food uf "+
+		"FROM food uf "+
 		"inner join food f on uf.food_id = f.id "+
 		"WHERE uf.user_id = $1 and uf.user_food_type = 'LIKE'", id)
 
