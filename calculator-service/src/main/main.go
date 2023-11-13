@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net"
 
 	repositories "github.com/mookrob/servicecalculator/main/repositories"
 	"github.com/mookrob/servicecalculator/main/routers"
@@ -51,6 +52,21 @@ func main() {
 
 	go func() {
 		repositories.ConnectMongoDB()
+	}()
+
+	go func() {
+		authGrpcService := grpc_services.NewAuthenticationGrpcService(authRepository)
+		pb.RegisterAuthServer(grpc_server, authGrpcService)
+
+		grpc_port := fmt.Sprintf(":%v", GRPC_PORT)
+		lis, err := net.Listen("tcp", grpc_port)
+		if err != nil {
+			log.Fatalf("Failed to listen: %v", err)
+		}
+		fmt.Println("GRPC Server listening on Port", grpc_port)
+		if err := grpc_server.Serve(lis); err != nil {
+			log.Fatalf("Failed to serve: %v", err)
+		}
 	}()
 
 	go func() {
