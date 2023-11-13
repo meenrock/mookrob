@@ -31,12 +31,12 @@ func (s *CalculatorServer) GetBMI(req *pb.GetUserBMIRequest, stream pb.BMIRespon
 		log.Printf("grpc GetUserFavMeal failed on user meal repository call: %v", err)
 		return &pb.BMIResponse{}, err
 	}
-	defer collection.Close()
 
 	var parameter models.UserBodyData
 
 	return &pb.BMIResponse{
-		Id: parameter.ID.String(),
+		Id:  parameter.ID.String(),
+		Bmi: collection.InsertedID,
 	}, nil
 
 }
