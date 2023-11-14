@@ -6,15 +6,18 @@ import (
 	"log"
 	"net"
 
+	pb "github.com/mookrob/servicecalculator/main/grpc-server"
 	repositories "github.com/mookrob/servicecalculator/main/repositories"
 	"github.com/mookrob/servicecalculator/main/routers"
 
 	// mqtt_services "github.com/mookrob/servicecalculator/main/services/mq"
+	grpc_services "github.com/mookrob/servicecalculator/main/services/grpc"
 	rest_services "github.com/mookrob/servicecalculator/main/services/rest"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/viper"
+	grpc_server "google.golang.org/grpc"
 )
 
 func main() {
@@ -55,8 +58,8 @@ func main() {
 	}()
 
 	go func() {
-		authGrpcService := grpc_services.NewAuthenticationGrpcService(authRepository)
-		pb.RegisterAuthServer(grpc_server, authGrpcService)
+		calculatorGrpcService := grpc_services.NewCalculatorGrpcService(calculatorRepository)
+		pb.RegisterCalculatorServer(grpc_server, calculatorGrpcService)
 
 		grpc_port := fmt.Sprintf(":%v", GRPC_PORT)
 		lis, err := net.Listen("tcp", grpc_port)
