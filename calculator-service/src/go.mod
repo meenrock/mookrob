@@ -5,7 +5,9 @@ go 1.21
 require github.com/rabbitmq/amqp091-go v1.9.0
 
 require (
+	github.com/aws/aws-sdk-go v1.47.11 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -17,5 +19,5 @@ require (
 	go.mongodb.org/mongo-driver v1.13.0 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 )

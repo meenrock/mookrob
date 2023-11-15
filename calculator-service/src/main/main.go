@@ -7,11 +7,10 @@ import (
 
 	pb "github.com/mookrob/servicecalculator/main/grpc-server"
 	repositories "github.com/mookrob/servicecalculator/main/repositories"
-	"github.com/mookrob/servicecalculator/main/routers"
 
 	// mqtt_services "github.com/mookrob/servicecalculator/main/services/mq"
 	grpc_services "github.com/mookrob/servicecalculator/main/services/grpc"
-	rest_services "github.com/mookrob/servicecalculator/main/services/rest"
+	// rest_services "github.com/mookrob/servicecalculator/main/services/rest"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -40,7 +39,7 @@ func main() {
 	// DB_NAME := viper.GetString("database.name")
 	// DB_USER := viper.GetString("database.user")
 	// DB_PASSWORD := viper.GetString("database.password")
-	PORT := viper.GetString("server.rest-port")
+	// PORT := viper.GetString("server.rest-port")
 	GRPC_PORT := viper.GetString("server.grpc-port")
 
 	// connect postgres
@@ -75,14 +74,18 @@ func main() {
 	go func() {
 		// Start the server
 
-		userCalculatorService := rest_services.NewUserCalculatorRestService(calculatorRepository)
-		routers.SetUserCalculatorRoutes(gin_engine, userCalculatorService)
+		// userCalculatorService := rest_services.NewUserCalculatorRestService(calculatorRepository)
+		// routers.SetUserCalculatorRoutes(gin_engine, userCalculatorService)
 
-		rest_port := fmt.Sprintf(":%v", PORT)
-		fmt.Println("Server Running on Port", rest_port)
-		if err := gin_engine.Run(rest_port); err != nil {
-			log.Fatal(err)
-		}
+		// rest_port := fmt.Sprintf(":%v", PORT)
+		// fmt.Println("Server Running on Port", rest_port)
+		// if err := gin_engine.Run(rest_port); err != nil {
+		// 	log.Fatal(err)
+		// }
+	}()
+
+	go func() {
+
 	}()
 
 	select {}
