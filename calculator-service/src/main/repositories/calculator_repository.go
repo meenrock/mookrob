@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"log"
 	"net/http"
 
 	// "go.mongodb.org/mongo-driver/bson"
@@ -21,47 +22,56 @@ type UserCalculatorRepositoryMongo struct {
 	MONGO *mongo.Database
 }
 
-func NewUserCalculatorRepository(db *sql.DB) *UserCalculatorRepository {
-	return &UserCalculatorRepository{DB: db}
+func NewUserCalculatorRepository(db *mongo.Database) *UserCalculatorRepositoryMongo {
+	return &UserCalculatorRepositoryMongo{MONGO: db}
 }
 
-func (r *UserCalculatorRepository) GetUserCalculationByUserId(id uuid.UUID) (*sql.Rows, error) {
-	rows, err := r.DB.Query("SELECT "+
-		"f.id, "+
-		"f.name, "+
-		"f.energy, "+
-		"f.protein, "+
-		"f.carbohydrate, "+
-		"f.fat, "+
-		"f.sodium, "+
-		"f.cholesterol, "+
-		"f.created_at, "+
-		"f.updated_at "+
-		"FROM user_food uf "+
-		"inner join food f on uf.food_id = f.id "+
-		"WHERE uf.user_id = $1 and uf.user_food_type = 'LIKE'", id)
-
+func (r *UserCalculatorRepositoryMongo) GetUserCalculationByUserId(id uuid.UUID) (mongo.InsertOneResult, error) {
+	coll := ConnectMongoDB().Database("db_name").Collection("collection")
+	result, err := coll.InsertOne(
+		context.TODO(),
+		bson.D{})
 	if err != nil {
-		return nil, err
+		log.Fatal("Error finding document:", err)
+		return *result, err
 	}
 
-	return rows, nil
+	return *result, nil
+}
+
+func (r *UserCalculatorRepositoryMongo) GetUserCalculationBMI(id uuid.UUID) (mongo.SingleResult, error) {
+	coll := ConnectMongoDB().Database("db_name").Collection("collection")
+
+	filter := bson.D{{"id", id.String()}}
+
+	result := coll.FindOne(context.Background(), filter)
+	if result.Err() != nil {
+		log.Fatal("Error finding document:", result.Err())
+		return mongo.SingleResult{}, result.Err()
+	}
+
+	return *result, nil
+}
+
+func (r *UserCalculatorRepositoryMongo) GetUserCalculationBMR(id uuid.UUID) (mongo.SingleResult, error) {
+	coll := ConnectMongoDB().Database("db_name").Collection("collection")
+
+	filter := bson.D{{"id", id}}
+
+	result := coll.FindOne(context.Background(), filter)
+	if result.Err() != nil {
+		log.Fatal("Error finding document:", result.Err())
+		return mongo.SingleResult{}, result.Err()
+	}
+
+	return *result, nil
 }
 
 func (r *UserCalculatorRepositoryMongo) AddParameter(id uuid.UUID, collection string, db_name string, ctx *gin.Context) {
 	coll := ConnectMongoDB().Database(db_name).Collection(collection)
 	result, err := coll.InsertOne(
 		context.TODO(),
-		bson.D{
-			{"item", "canvas"},
-			{"qty", 100},
-			{"tags", bson.A{"cotton"}},
-			{"size", bson.D{
-				{"h", 28},
-				{"w", 35.5},
-				{"uom", "cm"},
-			}},
-		})
+		bson.D{})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal.", "detailed": err})
 	}

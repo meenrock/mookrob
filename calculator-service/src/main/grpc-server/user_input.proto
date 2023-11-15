@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package protocalculator;
+
+option go_package = "github.com/mookrob/servicecalculator";
+
+service Calculator {
+    rpc BMI (GetUserBMIRequest) returns (BMIResponse) {}
+    rpc BMR (GetUserBMRRequest) returns (BMRResponse) {}
+
+}
+
+message Empty{}
+
+message GetUserBMIRequest {
+    string id=1;
+}
+
+message GetUserBMRRequest {
+    string id=1;
+}
+
+message BMIResponse {
+    string id=1;
+    double bmi=2;
+}
+
+message BMRResponse {
+    string id=1;
+    double bmr=2;
+}
