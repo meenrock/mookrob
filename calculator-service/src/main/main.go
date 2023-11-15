@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net"
@@ -17,12 +16,14 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/viper"
-	grpc_server "google.golang.org/grpc"
+	"google.golang.org/grpc"
 )
 
 func main() {
 	gin_engine := gin.Default()
 	gin_engine.Use(gin.Recovery())
+
+	grpc_server := grpc.NewServer()
 
 	viper.SetConfigName("config") // Name of the config file (without extension)
 	viper.SetConfigType("yaml")   // Type of the config file (yaml, json, etc.)
@@ -34,31 +35,30 @@ func main() {
 	}
 
 	// DB connection
-	DB_HOST := viper.GetString("database.host")
-	DB_PORT := viper.GetString("database.port")
-	DB_NAME := viper.GetString("database.name")
-	DB_USER := viper.GetString("database.user")
-	DB_PASSWORD := viper.GetString("database.password")
+	// DB_HOST := viper.GetString("database.host")
+	// DB_PORT := viper.GetString("database.port")
+	// DB_NAME := viper.GetString("database.name")
+	// DB_USER := viper.GetString("database.user")
+	// DB_PASSWORD := viper.GetString("database.password")
 	PORT := viper.GetString("server.rest-port")
+	GRPC_PORT := viper.GetString("server.grpc-port")
 
 	// connect postgres
-	psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
-	db, err := sql.Open("pgx", psqlInfo)
-	if err != nil {
-		log.Fatalf("Error while reading config file %s", err)
-	}
+	// psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
+	// db, err := sql.Open("pgx", psqlInfo)
+	// if err != nil {
+	// 	log.Fatalf("Error while reading config file %s", err)
+	// }
+
+	db := repositories.ConnectMongoDB()
 
 	// create instances of services and controllers
-	calculatorRepository := repositories.NewUserCalculatorRepository(db)
+	calculatorRepository := repositories.NewUserCalculatorRepository()
 	// userService := services.NewUserService(userRepository)
 	// routers.SetUserRoutes(r, userService)
 
 	go func() {
-		repositories.ConnectMongoDB()
-	}()
-
-	go func() {
-		calculatorGrpcService := grpc_services.NewCalculatorGrpcService(calculatorRepository)
+		calculatorGrpcService := grpc_services.NewCalculatorGrpcService()
 		pb.RegisterCalculatorServer(grpc_server, calculatorGrpcService)
 
 		grpc_port := fmt.Sprintf(":%v", GRPC_PORT)

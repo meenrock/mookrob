@@ -22,11 +22,11 @@ type UserCalculatorRepositoryMongo struct {
 	MONGO *mongo.Database
 }
 
-func NewUserCalculatorRepository(db *sql.DB) *UserCalculatorRepository {
-	return &UserCalculatorRepository{DB: db}
+func NewUserCalculatorRepository(db *mongo.Database) *UserCalculatorRepositoryMongo {
+	return &UserCalculatorRepositoryMongo{MONGO: db}
 }
 
-func (r *UserCalculatorRepository) GetUserCalculationByUserId(id uuid.UUID) (mongo.InsertOneResult, error) {
+func (r *UserCalculatorRepositoryMongo) GetUserCalculationByUserId(id uuid.UUID) (mongo.InsertOneResult, error) {
 	coll := ConnectMongoDB().Database("db_name").Collection("collection")
 	result, err := coll.InsertOne(
 		context.TODO(),
@@ -39,10 +39,24 @@ func (r *UserCalculatorRepository) GetUserCalculationByUserId(id uuid.UUID) (mon
 	return *result, nil
 }
 
-func (r *UserCalculatorRepository) GetUserCalculationBMI(id uuid.UUID) (mongo.SingleResult, error) {
+func (r *UserCalculatorRepositoryMongo) GetUserCalculationBMI(id uuid.UUID) (mongo.SingleResult, error) {
 	coll := ConnectMongoDB().Database("db_name").Collection("collection")
 
-	filter := bson.D{{}}
+	filter := bson.D{{"id", id.String()}}
+
+	result := coll.FindOne(context.Background(), filter)
+	if result.Err() != nil {
+		log.Fatal("Error finding document:", result.Err())
+		return mongo.SingleResult{}, result.Err()
+	}
+
+	return *result, nil
+}
+
+func (r *UserCalculatorRepositoryMongo) GetUserCalculationBMR(id uuid.UUID) (mongo.SingleResult, error) {
+	coll := ConnectMongoDB().Database("db_name").Collection("collection")
+
+	filter := bson.D{{"id", id}}
 
 	result := coll.FindOne(context.Background(), filter)
 	if result.Err() != nil {
