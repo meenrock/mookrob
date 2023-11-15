@@ -8,10 +8,15 @@ import (
 	"googlemaps.github.io/maps"
 )
 
-type PlaceRestService struct{}
+type PlaceRestService struct {
+	googleKey string
+}
 
 func NewPlaceRestService() *PlaceRestService {
-	return &PlaceRestService{}
+
+	GOOGLE_API_KEY := viper.GetString("GOOGLE_API_KEY")
+
+	return &PlaceRestService{googleKey: GOOGLE_API_KEY}
 }
 
 // search place response
@@ -32,9 +37,9 @@ func (s *PlaceRestService) SearchPlaces(ctx *gin.Context) {
 	mealName := ctx.Query("meal_name")
 
 	// Create a new Google Maps client.
-	client, err := maps.NewClient(maps.WithAPIKey(viper.GetString("google.api-key")))
+	client, err := maps.NewClient(maps.WithAPIKey(s.googleKey))
 	if err != nil {
-		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -46,7 +51,7 @@ func (s *PlaceRestService) SearchPlaces(ctx *gin.Context) {
 	// Send the search request.
 	resp, err := client.TextSearch(ctx, req)
 	if err != nil {
-		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

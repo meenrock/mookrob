@@ -7,22 +7,23 @@ services:
       GIN_MODE: "release"
       REST_PORT: "8080"
       GRPC_PORT: "50050"
-      DB_HOST: "192.168.1.39"
-      DB_PORT: "5442"
+      DB_HOST: "mookrob-authentication.cwle0giyacpw.us-east-1.rds.amazonaws.com"
+      DB_PORT: "5432"
       DB_NAME: "authentication"
-      DB_USERNAME: "postgres"
-      DB_PASSWORD: "postgres"
+      DB_USERNAME: "mookrob"
+      DB_PASSWORD: "mookrob_password"
       JWT_SECRET_KEY: "m345lko@okr&0b"
       REFRESH_TOKEN: "m3!7lk8C9or&0b"
     build:
       context: ..
       args:
-        - DB_HOST=192.168.1.39
-        - DB_PORT=5442
+        - DB_HOST=mookrob-authentication.cwle0giyacpw.us-east-1.rds.amazonaws.com
+        - DB_PORT=5432
         - DB_NAME=authentication
-        - DB_USERNAME=postgres
-        - DB_PASSWORD=postgres
+        - DB_USERNAME=mookrob
+        - DB_PASSWORD=mookrob_password
       dockerfile: /auth-service/Dockerfile
+    image: mookrob-auth-app:latest
     ports:
       - "8083:8080"
       - "50053:50050"

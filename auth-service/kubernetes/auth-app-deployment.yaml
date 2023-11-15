@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-app
+  template:
+    metadata:
+      labels:
+        app: auth-app
+    spec:
+      containers:
+        - env:
+            - name: DB_HOST
+              value: mookrob-authentication.cwle0giyacpw.us-east-1.rds.amazonaws.com
+            - name: DB_NAME
+              value: authentication
+            - name: DB_PASSWORD
+              value: mookrob_password
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USERNAME
+              value: mookrob
+            - name: ENV
+              value: dev
+            - name: GIN_MODE
+              value: release
+            - name: GRPC_PORT
+              value: "50050"
+            - name: JWT_SECRET_KEY
+              value: m345lko@okr&0b
+            - name: REFRESH_TOKEN
+              value: m3!7lk8C9or&0b
+            - name: REST_PORT
+              value: "8080"
+          image: 842358650856.dkr.ecr.us-east-1.amazonaws.com/mookrob-auth-app:latest
+          name: auth-app
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 50050
+              protocol: TCP
+          resources: {}
+      restartPolicy: Always
+status: {}

@@ -1,0 +1,21 @@
+# connect ECR process
+(Get-ECRLoginCommand).Password | docker login --username AWS --password-stdin {ECR_HOST}
+
+# if above command fail
+Set-ExecutionPolicy Bypass -Scope Process
+
+# deploy pharse
+
+# build image
+docker compose build
+
+# push image
+docker tag {LOCAL_IMAGE_NAME}:latest {ECR_HOST}/{REMOTE_IMAGENAME}:latest
+
+docker push {ECR_HOST}/{REMOTE_IMAGENAME}:latest
+
+# update kube deployment & service config
+kubectl apply -f ./kubernetes
+
+# force restart
+kubectl rollout restart deployment auth-app

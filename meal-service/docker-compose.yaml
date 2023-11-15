@@ -7,21 +7,22 @@ services:
       GIN_MODE: "release"
       REST_PORT: "8080"
       GRPC_PORT: "50050"
-      DB_HOST: "192.168.1.39"
-      DB_PORT: "5441"
+      DB_HOST: "mookrob-meal.cwle0giyacpw.us-east-1.rds.amazonaws.com"
+      DB_PORT: "5432"
       DB_NAME: "meal"
-      DB_USERNAME: "postgres"
-      DB_PASSWORD: "postgres"
+      DB_USERNAME: "mookrob"
+      DB_PASSWORD: "mookrob_password"
       JWT_SECRET_KEY: "m345lko@okr&0b"
     build:
       context: ..
       args:
-        - DB_HOST=192.168.1.39
-        - DB_PORT=5441
+        - DB_HOST=mookrob-meal.cwle0giyacpw.us-east-1.rds.amazonaws.com
+        - DB_PORT=5432
         - DB_NAME=meal
-        - DB_USERNAME=postgres
-        - DB_PASSWORD=postgres
+        - DB_USERNAME=mookrob
+        - DB_PASSWORD=mookrob_password
       dockerfile: /meal-service/Dockerfile
+    image: mookrob-meal-app:latest
     ports:
-      - "8082:8080"
-      - "50052:50050"
+      - "8080:8080"
+      - "50050:50050"

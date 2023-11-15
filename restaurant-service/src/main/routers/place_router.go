@@ -9,8 +9,8 @@ import (
 )
 
 func SetPlaceRoutes(router *gin.Engine, ctrls *services.PlaceRestService) {
-	placeRoutes := router.Group("/api/place")
+	placeRoutes := router.Group("/api/restaurant/place")
 	{
-		placeRoutes.GET("/search", authentication.AuthMiddleware(constants.GENERAL_USER), ctrls.SearchPlaces)
+		placeRoutes.GET("/", authentication.AuthMiddleware(constants.GENERAL_USER), ctrls.SearchPlaces)
 	}
 }

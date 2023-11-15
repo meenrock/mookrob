@@ -33,9 +33,9 @@ func main() {
 	DB_PASSWORD := viper.GetString("DB_PASSWORD")
 	REST_PORT := viper.GetString("REST_PORT")
 
+	gin.SetMode(viper.GetString("GIN_MODE"))
 	gin_engine := gin.Default()
 	gin_engine.Use(gin.Recovery())
-	gin.SetMode(viper.GetString("GIN_MODE"))
 
 	// connect postgres
 	psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)

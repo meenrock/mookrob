@@ -38,9 +38,9 @@ func main() {
 	REST_PORT := viper.GetString("REST_PORT")
 	GRPC_PORT := viper.GetString("GRPC_PORT")
 
+	gin.SetMode(viper.GetString("GIN_MODE"))
 	gin_engine := gin.Default()
 	gin_engine.Use(gin.Recovery())
-	gin.SetMode(viper.GetString("GIN_MODE"))
 
 	grpc_server := grpc.NewServer()
 

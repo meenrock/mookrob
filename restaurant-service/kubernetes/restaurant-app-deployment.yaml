@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restaurant-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: restaurant-app
+  template:
+    metadata:
+      labels:
+        app: restaurant-app
+    spec:
+      containers:
+        - env:
+            - name: ENV
+              value: dev
+            - name: GIN_MODE
+              value: release
+            - name: GOOGLE_API_KEY
+              value: AIzaSyD1T-WZxo0qHDTEexvV-CWJg0nLFRz5nDM
+            - name: GRPC_PORT
+              value: "50050"
+            - name: JWT_SECRET_KEY
+              value: m345lko@okr&0b
+            - name: REST_PORT
+              value: "8080"
+          image: 842358650856.dkr.ecr.us-east-1.amazonaws.com/mookrob-restaurant-app:latest
+          name: restaurant-app
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 50050
+              protocol: TCP
+          resources: {}
+      restartPolicy: Always
+status: {}

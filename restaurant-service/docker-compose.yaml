@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  restaurant-app:
+    environment:
+      ENV: "dev"
+      GIN_MODE: "release"
+      REST_PORT: "8080"
+      GRPC_PORT: "50050"
+      JWT_SECRET_KEY: "m345lko@okr&0b"
+      GOOGLE_API_KEY: "AIzaSyD1T-WZxo0qHDTEexvV-CWJg0nLFRz5nDM"
+    build:
+      context: ..
+      dockerfile: /restaurant-service/Dockerfile
+    image: mookrob-restaurant-app:latest
+    ports:
+      - "8084:8080"
+      - "50054:50050"
