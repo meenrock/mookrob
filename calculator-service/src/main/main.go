@@ -7,9 +7,11 @@ import (
 
 	pb "github.com/mookrob/servicecalculator/main/grpc-server"
 	repositories "github.com/mookrob/servicecalculator/main/repositories"
+	router "github.com/mookrob/servicecalculator/main/routers"
 
-	// mqtt_services "github.com/mookrob/servicecalculator/main/services/mq"
 	grpc_services "github.com/mookrob/servicecalculator/main/services/grpc"
+	mqtt_services "github.com/mookrob/servicecalculator/main/services/mq"
+
 	// rest_services "github.com/mookrob/servicecalculator/main/services/rest"
 
 	"github.com/gin-gonic/gin"
@@ -49,10 +51,10 @@ func main() {
 	// 	log.Fatalf("Error while reading config file %s", err)
 	// }
 
-	db := repositories.ConnectMongoDB()
+	// db := repositories.ConnectMongoDB()
 
 	// create instances of services and controllers
-	calculatorRepository := repositories.NewUserCalculatorRepository()
+	// calculatorRepository := repositories.NewUserCalculatorRepository()
 	// userService := services.NewUserService(userRepository)
 	// routers.SetUserRoutes(r, userService)
 
@@ -85,7 +87,21 @@ func main() {
 	}()
 
 	go func() {
+		mongoDBRepo, err := repositories.NewMongoDBRepository("your_mongo_connection_string", "your_db_name", "your_collection_name")
+		if err != nil {
+			log.Fatalf("Failed to initialize MongoDB repository: %v", err)
+		}
 
+		sqsRepo, err := repositories.NewSQSRepository("your_aws_region", "your_sqs_queue_url")
+		if err != nil {
+			log.Fatalf("Failed to initialize SQS repository: %v", err)
+		}
+
+		userService := mqtt_services.NewUserService(mongoDBRepo, sqsRepo)
+		appRouter := router.NewRouter(userService)
+		engine := appRouter.SetupRoutes()
+
+		engine.Run(":8080")
 	}()
 
 	select {}

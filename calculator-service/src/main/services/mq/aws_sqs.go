@@ -3,31 +3,29 @@ package services
 import (
 	"log"
 
-	"github.com/your-username/myproject/model"
-	"github.com/your-username/myproject/repository"
+	"github.com/mookrob/servicecalculator/main/models"
+	"github.com/mookrob/servicecalculator/main/repositories"
 )
 
 type UserService struct {
-	MongoDBRepo *repository.MongoDBRepository
-	SQSRepo     *repository.SQSRepository
+	MongoDBRepo *repositories.MongoDBRepository
+	SQSRepo     *repositories.SQSRepository
 }
 
-func NewUserService(mongoDBRepo *repository.MongoDBRepository, sqsRepo *repository.SQSRepository) *UserService {
+func NewUserService(mongoDBRepo *repositories.MongoDBRepository, sqsRepo *repositories.SQSRepository) *UserService {
 	return &UserService{
 		MongoDBRepo: mongoDBRepo,
 		SQSRepo:     sqsRepo,
 	}
 }
 
-func (us *UserService) SaveUserBodyData(userData *model.UserBodyData) error {
-	// Save to MongoDB
+func (us *UserService) SaveUserBodyData(userData *models.UserBodyData) error {
 	err := us.MongoDBRepo.InsertUserBodyData(userData)
 	if err != nil {
 		log.Printf("Failed to save to MongoDB: %v", err)
 		return err
 	}
 
-	// Send to SQS
 	err = us.SQSRepo.SendMessage(userData)
 	if err != nil {
 		log.Printf("Failed to send message to SQS: %v", err)

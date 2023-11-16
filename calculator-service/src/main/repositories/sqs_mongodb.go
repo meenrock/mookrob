@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"context"
+	"log"
 	"time"
 
+	"github.com/mookrob/servicecalculator/main/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -36,4 +38,20 @@ func NewMongoDBRepository(connectionString, dbName, collectionName string) (*Mon
 		Database:   db,
 		Collection: collection,
 	}, nil
+}
+
+func (repo *MongoDBRepository) InsertUserBodyData(userData *models.UserBodyData) error {
+
+	userData.CreatedAt = time.Now()
+	userData.UpdatedAt = time.Now()
+
+	insertResult, err := repo.Collection.InsertOne(context.TODO(), userData)
+	if err != nil {
+		log.Printf("Failed to insert user data into MongoDB: %v", err)
+		return err
+	}
+
+	log.Printf("Inserted user data with ID %v", insertResult.InsertedID)
+
+	return nil
 }
