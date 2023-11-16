@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: auth-app
+  name: auth-app
+spec:
+  ports:
+    - name: http-port
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: grpc-port
+      protocol: TCP
+      port: 50050
+      targetPort: 50050
+  type: ClusterIP
+  selector:
+    app: auth-app
+status:
+  loadBalancer: {}

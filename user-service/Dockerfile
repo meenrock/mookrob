@@ -1,25 +1,27 @@
 # Use the official Go image as a parent image
 FROM golang:1.21 AS build
 
-# Set the working directory inside the container
-WORKDIR /app
+WORKDIR /app/src
 
-# Copy the Go application source code into the container
-COPY . .
+COPY user-service/src .
 
 WORKDIR /app/src
 
-# Build the Go application
-RUN go build -o myapp ./main
+ARG DB_HOST
+ARG DB_PORT
+ARG DB_NAME
+ARG DB_USERNAME
+ARG DB_PASSWORD
 
-# Start a new stage to create a minimal image
-FROM scratch
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
+    && migrate -database "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require&sslrootcert=/shared/labsuser.pem" -path ./resources/migrations up
 
-# Copy the compiled binary from the previous stage
-COPY --from=build /app/src/myapp /myapp
+WORKDIR /shared
 
-# Expose the port the application will run on (if needed)
-EXPOSE 8080
+COPY shared .
 
-# Define the command to run your application
-CMD ["/myapp"]
+WORKDIR /app/src/main
+
+RUN go build -o main .
+
+CMD ["./main"]

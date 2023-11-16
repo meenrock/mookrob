@@ -23,8 +23,8 @@ type AuthenticationRestService struct {
 }
 
 func NewAuthenticationRestService(r *repositories.AuthenticationRepository) *AuthenticationRestService {
-	jwtKey = []byte(viper.GetString("jwt.secret_key"))
-	refreshKey = []byte(viper.GetString("jwt.refresh_key"))
+	jwtKey = []byte(viper.GetString("JWT_SECRET_KEY"))
+	refreshKey = []byte(viper.GetString("REFRESH_TOKEN"))
 	return &AuthenticationRestService{AuthenticationRepository: r}
 }
 

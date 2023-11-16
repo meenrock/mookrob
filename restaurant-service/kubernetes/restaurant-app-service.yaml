@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: restaurant-app
+  name: restaurant-app
+spec:
+  ports:
+    - name: http-port
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: grpc-port
+      protocol: TCP
+      port: 50050
+      targetPort: 50050
+  type: ClusterIP
+  selector:
+    app: restaurant-app
+status:
+  loadBalancer: {}

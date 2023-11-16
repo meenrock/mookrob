@@ -15,7 +15,7 @@ import (
 
 func AuthMiddleware(role constants.Role) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var jwtKey = []byte(viper.GetString("jwt.secret_key"))
+		var jwtKey = []byte(viper.GetString("JWT_SECRET_KEY"))
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing authorization header"})
@@ -27,7 +27,7 @@ func AuthMiddleware(role constants.Role) gin.HandlerFunc {
 			return jwtKey, nil
 		})
 		if err != nil || !token.Valid {
-			log.Println("AuthMiddleware: Invalid token")
+			log.Println("AuthMiddleware: Invalid token", err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthenticated"})
 			return
 		}
@@ -53,7 +53,7 @@ func AuthMiddleware(role constants.Role) gin.HandlerFunc {
 
 func AuthListMiddleware(roleList []constants.Role) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var jwtKey = []byte(viper.GetString("jwt.secret_key"))
+		var jwtKey = []byte(viper.GetString("JWT_SECRET_KEY"))
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing authorization header"})

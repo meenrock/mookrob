@@ -8,32 +8,35 @@ import (
 	rest_services "github.com/mookrob/servicerestaurant/main/services/rest"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
 func main() {
-	r := gin.Default()
+	err := godotenv.Load("../resources/.env")
 
-	viper.SetConfigName("config") // Name of the config file (without extension)
-	viper.SetConfigType("yaml")   // Type of the config file (yaml, json, etc.)
-	viper.AddConfigPath("../resources/")
-
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("Error reading config file: %s\n", err)
+	if err != nil {
+		fmt.Println("Error loading .env file", err)
 		return
 	}
 
-	PORT := viper.GetString("server.port")
+	viper.AutomaticEnv()
+
+	// DB connection
+	REST_PORT := viper.GetString("REST_PORT")
+
+	gin.SetMode(viper.GetString("GIN_MODE"))
+	gin_engine := gin.Default()
+	gin_engine.Use(gin.Recovery())
 
 	// create instances of services and controllers
 	placeService := rest_services.NewPlaceRestService()
-	routers.SetPlaceRoutes(r, placeService)
+	routers.SetPlaceRoutes(gin_engine, placeService)
 
 	// Start the server
-	port := fmt.Sprintf(":%v", PORT)
+	port := fmt.Sprintf(":%v", REST_PORT)
 	fmt.Println("Server Running on Port", port)
-	if err := r.Run(port); err != nil {
+	if err := gin_engine.Run(port); err != nil {
 		log.Fatal(err)
 	}
 }

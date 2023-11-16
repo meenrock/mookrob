@@ -28,8 +28,8 @@ type UserRestService struct {
 
 func NewUserRestService(r *repositories.UserRepository) *UserRestService {
 
-	MEAL_GRPC_HOST := viper.GetString("client.meal-grpc-host")
-	AUTH_GRPC_HOST := viper.GetString("client.auth-grpc-host")
+	MEAL_GRPC_HOST := viper.GetString("CLIENT_MEAL_GRPC_HOST")
+	AUTH_GRPC_HOST := viper.GetString("CLIENT_AUTH_GRPC_HOST")
 
 	return &UserRestService{UserRepository: r, mealGrpcHost: MEAL_GRPC_HOST, authGrpcHost: AUTH_GRPC_HOST}
 }
