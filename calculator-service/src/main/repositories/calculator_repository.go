@@ -7,6 +7,8 @@ import (
 
 	// "go.mongodb.org/mongo-driver/bson"
 
+	pb "github.com/mookrob/servicecalculator/main/grpc-server"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,6 +17,10 @@ import (
 
 type UserCalculatorRepositoryMongo struct {
 	MONGO *mongo.Database
+}
+
+type GrpcServerImpl struct {
+	pb.UnimplementedCalculatorServer
 }
 
 func NewUserCalculatorRepository(db *mongo.Database) *UserCalculatorRepositoryMongo {

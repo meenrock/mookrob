@@ -16,7 +16,7 @@ import (
 )
 
 type UserCalculatorService struct {
-	UserCalculatorRepository *repositories.UserCalculatorRepository
+	UserCalculatorRepository *repositories.UserCalculatorRepositoryMongo
 }
 
 func PublishUserInfo(ctx *gin.Context) {

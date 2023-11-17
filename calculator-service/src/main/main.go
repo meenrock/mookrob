@@ -6,9 +6,11 @@ import (
 	"log"
 	"net"
 
+	pb "github.com/mookrob/servicecalculator/main/grpc-server"
 	repositories "github.com/mookrob/servicecalculator/main/repositories"
 	router "github.com/mookrob/servicecalculator/main/routers"
 
+	// grpc_services "github.com/mookrob/servicecalculator/main/services/grpc"
 	mqtt_services "github.com/mookrob/servicecalculator/main/services/mq"
 
 	// rest_services "github.com/mookrob/servicecalculator/main/services/rest"
@@ -44,6 +46,26 @@ func main() {
 	MONGO_DATABASE := viper.GetString("mongo.database")
 	MongoDBConnectionString := fmt.Sprintf("mongodb://%s:%s@%s:%s", MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT)
 
+	client, err := mongo.NewClient(options.Client().ApplyURI(MongoDBConnectionString))
+	if err != nil {
+		log.Fatalf("Failed to create MongoDB client: %v", err)
+	}
+	if err := client.Connect(context.Background()); err != nil {
+		log.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+	err = client.Ping(context.Background(), nil)
+	if err != nil {
+		log.Fatalf("Failed to ping MongoDB: %v", err)
+	}
+
+	database := client.Database(MONGO_DATABASE)
+
+	defer func() {
+		if err := client.Disconnect(context.Background()); err != nil {
+			log.Fatalf("Failed to disconnect MongoDB client: %v", err)
+		}
+	}()
+
 	// connect postgres
 	// psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
 	// db, err := sql.Open("pgx", psqlInfo)
@@ -60,34 +82,27 @@ func main() {
 
 	go func() {
 
-		client, err := mongo.NewClient(options.Client().ApplyURI(MongoDBConnectionString))
-		if err != nil {
-			log.Fatalf("Failed to create MongoDB client: %v", err)
-		}
-		if err := client.Connect(context.Background()); err != nil {
-			log.Fatalf("Failed to connect to MongoDB: %v", err)
-		}
-		err = client.Ping(context.Background(), nil)
-		if err != nil {
-			log.Fatalf("Failed to ping MongoDB: %v", err)
-		}
-
-		database := client.Database(MONGO_DATABASE)
-
-		CalculatorRepository := repositories.NewUserCalculatorRepository(database)
-
-		defer func() {
-			if err := client.Disconnect(context.Background()); err != nil {
-				log.Fatalf("Failed to disconnect MongoDB client: %v", err)
-			}
-		}()
+		grpc_server := grpc.NewServer()
 
 		lis, err := net.Listen("tcp", GRPC_PORT)
 		if err != nil {
 			log.Fatalf("Failed to listen: %v", err)
 		}
-		grpc_server := grpc.NewServer()
-		CalculatorRepository := repositories.NewUserCalculatorRepository()
+
+		//CalculatorRepository := repositories.NewUserCalculatorRepository(database)
+
+		//CalculatorGrpcService := grpc_services.NewCalculatorGrpcService(CalculatorRepository)
+		pb.RegisterCalculatorServer(grpc_server, repositories.GrpcServerImpl{})
+
+		grpc_port := fmt.Sprintf(":%v", GRPC_PORT)
+		lis, err := net.Listen("tcp", grpc_port)
+		if err != nil {
+			log.Fatalf("Failed to listen: %v", err)
+		}
+		fmt.Println("GRPC Server listening on Port", grpc_port)
+		if err := grpc_server.Serve(lis); err != nil {
+			log.Fatalf("Failed to serve: %v", err)
+		}
 
 	}()
 
