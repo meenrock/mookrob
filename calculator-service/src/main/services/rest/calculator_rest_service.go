@@ -7,10 +7,10 @@ import (
 )
 
 type UserCalculatorService struct {
-	UserCalculatorRepository *repositories.UserCalculatorRepository
+	UserCalculatorRepository *repositories.UserCalculatorRepositoryMongo
 }
 
-func NewUserCalculatorRestService(r *repositories.UserCalculatorRepository) *UserCalculatorService {
+func NewUserCalculatorRestService(r *repositories.UserCalculatorRepositoryMongo) *UserCalculatorService {
 	return &UserCalculatorService{UserCalculatorRepository: r}
 }
 
