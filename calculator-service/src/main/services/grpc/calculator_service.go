@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"log"
 
 	"github.com/google/uuid"
@@ -13,17 +14,13 @@ type CalculatorServer struct {
 	CalculatorUserRepository *repositories.UserCalculatorRepositoryMongo
 }
 
-func NewCalculatorGrpcService() *CalculatorServer {
-	return &CalculatorServer{}
+func NewCalculatorGrpcService(r *repositories.UserCalculatorRepositoryMongo) *CalculatorServer {
+	return &CalculatorServer{CalculatorUserRepository: r}
 }
-
-// func NewCalculatorGrpcService(r *repositories.UserCalculatorRepositoryMongo) *CalculatorServer {
-// 	return &CalculatorServer{CalculatorUserRepository: r}
-// }
 
 func (s *CalculatorServer) mustEmbedUnimplementedCalculatorServer() {}
 
-func (s *CalculatorServer) GetBMI(req *pb.GetUserBMIRequest, stream pb.BMIResponse) (*pb.BMIResponse, error) {
+func (s *CalculatorServer) GetBMI(input context.Context, req *pb.GetUserBMIRequest) (*pb.BMIResponse, error) {
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		log.Printf("grpc GetUserFavMeal failed parse param: %v", err)
@@ -50,7 +47,7 @@ func (s *CalculatorServer) GetBMI(req *pb.GetUserBMIRequest, stream pb.BMIRespon
 
 }
 
-func (s *CalculatorServer) GetBMR(req *pb.GetUserBMRRequest, stream pb.BMRResponse) (*pb.BMRResponse, error) {
+func (s *CalculatorServer) GetBMR(input context.Context, req *pb.GetUserBMRRequest) (*pb.BMRResponse, error) {
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		log.Printf("grpc GetUserFavMeal failed parse param: %v", err)

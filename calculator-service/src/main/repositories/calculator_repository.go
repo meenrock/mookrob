@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"net/http"
 
@@ -13,10 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-type UserCalculatorRepository struct {
-	DB *sql.DB
-}
 
 type UserCalculatorRepositoryMongo struct {
 	MONGO *mongo.Database

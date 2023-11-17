@@ -28,4 +28,5 @@ mongo:
   host: cluster0.eozr4.mongodb.net/?retryWrites=true&w=majority
   port:
   user: meen
-  password: nova
+  password: 
+  database: unknown
