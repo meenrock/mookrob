@@ -43,27 +43,25 @@ func main() {
 	MONGO_PORT := viper.GetString("mongo.port")
 	MONGO_USER := viper.GetString("mongo.user")
 	MONGO_PASSWORD := viper.GetString("mongo.password")
-	MONGO_DATABASE := viper.GetString("mongo.database")
+	// MONGO_DATABASE := viper.GetString("mongo.database")
 	MongoDBConnectionString := fmt.Sprintf("mongodb://%s:%s@%s:%s", MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT)
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(MongoDBConnectionString))
-	if err != nil {
-		log.Fatalf("Failed to create MongoDB client: %v", err)
-	}
-	if err := client.Connect(context.Background()); err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
-		log.Fatalf("Failed to ping MongoDB: %v", err)
-	}
-
-	database := client.Database(MONGO_DATABASE)
-
-	defer func() {
-		if err := client.Disconnect(context.Background()); err != nil {
-			log.Fatalf("Failed to disconnect MongoDB client: %v", err)
+	go func() {
+		mongoDBRepo, err := repositories.NewMongoDBRepository("your_mongo_connection_string", "your_db_name", "your_collection_name")
+		if err != nil {
+			log.Fatalf("Failed to initialize MongoDB repository: %v", err)
 		}
+
+		sqsRepo, err := repositories.NewSQSRepository("your_aws_region", "your_sqs_queue_url")
+		if err != nil {
+			log.Fatalf("Failed to initialize SQS repository: %v", err)
+		}
+
+		userService := mqtt_services.NewUserService(mongoDBRepo, sqsRepo)
+		appRouter := router.NewRouter(userService)
+		engine := appRouter.SetupRoutes()
+
+		engine.Run(":8080")
 	}()
 
 	// connect postgres
@@ -84,11 +82,6 @@ func main() {
 
 		grpc_server := grpc.NewServer()
 
-		lis, err := net.Listen("tcp", GRPC_PORT)
-		if err != nil {
-			log.Fatalf("Failed to listen: %v", err)
-		}
-
 		//CalculatorRepository := repositories.NewUserCalculatorRepository(database)
 
 		//CalculatorGrpcService := grpc_services.NewCalculatorGrpcService(CalculatorRepository)
@@ -107,34 +100,26 @@ func main() {
 	}()
 
 	go func() {
-		// Start the server
-
-		// userCalculatorService := rest_services.NewUserCalculatorRestService(calculatorRepository)
-		// routers.SetUserCalculatorRoutes(gin_engine, userCalculatorService)
-
-		// rest_port := fmt.Sprintf(":%v", PORT)
-		// fmt.Println("Server Running on Port", rest_port)
-		// if err := gin_engine.Run(rest_port); err != nil {
-		// 	log.Fatal(err)
-		// }
-	}()
-
-	go func() {
-		mongoDBRepo, err := repositories.NewMongoDBRepository("your_mongo_connection_string", "your_db_name", "your_collection_name")
+		client, err := mongo.NewClient(options.Client().ApplyURI(MongoDBConnectionString))
 		if err != nil {
-			log.Fatalf("Failed to initialize MongoDB repository: %v", err)
+			log.Fatalf("Failed to create MongoDB client: %v", err)
+		}
+		if err := client.Connect(context.Background()); err != nil {
+			log.Fatalf("Failed to connect to MongoDB: %v", err)
+		}
+		err = client.Ping(context.Background(), nil)
+		if err != nil {
+			log.Fatalf("Failed to ping MongoDB: %v", err)
 		}
 
-		sqsRepo, err := repositories.NewSQSRepository("your_aws_region", "your_sqs_queue_url")
-		if err != nil {
-			log.Fatalf("Failed to initialize SQS repository: %v", err)
-		}
+		// database := client.Database(MONGO_DATABASE)
 
-		userService := mqtt_services.NewUserService(mongoDBRepo, sqsRepo)
-		appRouter := router.NewRouter(userService)
-		engine := appRouter.SetupRoutes()
+		defer func() {
+			if err := client.Disconnect(context.Background()); err != nil {
+				log.Fatalf("Failed to disconnect MongoDB client: %v", err)
+			}
+		}()
 
-		engine.Run(":8080")
 	}()
 
 	select {}
