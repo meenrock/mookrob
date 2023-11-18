@@ -14,6 +14,6 @@ func SetMealRoutes(router *gin.Engine, ctrls *services.MealRestService) {
 		mealRoutes.POST("/create", authentication.AuthMiddleware(constants.ADMIN), ctrls.CreateMeal)
 		mealRoutes.GET("/", authentication.AuthMiddleware(constants.ADMIN), ctrls.GetMealList)
 		mealRoutes.PUT("/edit", authentication.AuthMiddleware(constants.ADMIN), ctrls.EditMeal)
-		mealRoutes.GET("/suggest", authentication.AuthMiddleware(constants.ADMIN), ctrls.SuggestMeal)
+		mealRoutes.GET("/suggest", authentication.AuthMiddleware(constants.GENERAL_USER), ctrls.SuggestMeal)
 	}
 }
