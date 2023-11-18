@@ -169,64 +169,34 @@ type AllMealSuggest struct {
     Dinner    []MealSuggest `json:"dinner"`
 }
 
-func generateMealSuggestions(caloriesPerDay int) []MealSuggestion {
+
+func generateMealSuggestions(caloriesPerDay int) AllMealSuggest {
+    DatabaseConfig := 
+    var dbConfig DatabaseConfig = DatabaseConfig{
+        Host:     "mookrob-meal.cwle0giyacpw.us-east-1.rds.amazonaws.com",
+        Port:     "5432",
+        Name:     "meal",
+        Username: "mookrob",
+        Password: "mookrob_password",
+    };
+
     // Calculate meal calories based on the desired percentages
-    breakfastCalories := caloriesPerDay * (3/10)
-    lunchCalories := caloriesPerDay * (5/10)
-    dinnerCalories := caloriesPerDay * (2/10)
+    breakfastCalories := caloriesPerDay * (3 / 10)
+    lunchCalories := caloriesPerDay * (5 / 10)
+    dinnerCalories := caloriesPerDay * (2 / 10)
 
-    // Retrieve breakfast suggestions from the PostgreSQL database
-    breakfastSuggestions := fetchMealSuggestionsFromDatabase(breakfastCalories)
+    // Retrieve meal suggestions from the PostgreSQL database
+    breakfastSuggestions := fetchMealSuggestionsFromDatabase(caloriesPerDay, dbConfig)
+    lunchSuggestions := fetchMealSuggestionsFromDatabase(caloriesPerDay, dbConfig)
+    dinnerSuggestions := fetchMealSuggestionsFromDatabase(caloriesPerDay, dbConfig)
 
-    // Retrieve lunch suggestions from the PostgreSQL database
-    lunchSuggestions := fetchMealSuggestionsFromDatabase(lunchCalories)
-
-    // Retrieve dinner suggestions from the PostgreSQL database
-    dinnerSuggestions := fetchMealSuggestionsFromDatabase(dinnerCalories)
-
-    // Combine suggestions into a single list
-    mealSuggestions := []MealSuggestion{}
-    mealSuggestions = append(mealSuggestions, breakfastSuggestions...)
-    mealSuggestions = append(mealSuggestions, lunchSuggestions...)
-    mealSuggestions = append(mealSuggestions, dinnerSuggestions...)
-
-    return mealSuggestions
-}
-
-
-dbConfig := DatabaseConfig{
-    Host:     "mookrob-meal.cwle0giyacpw.us-east-1.rds.amazonaws.com",
-    Port:     "5432",
-    Name:     "meal",
-    Username: "mookrob",
-    Password: "mookrob_password",
-}
-
-func fetchMealSuggestionsFromDatabase(calories int) []MealSuggest {
-    // Establish connection to PostgreSQL database 
-    db, err := connectToPostgreSQL(*dbConfig)
-    defer db.Close()
-
-    // Prepare query to retrieve meal suggestions based on calorie limit
-    query := `SELECT * FROM meals WHERE calories <= $1;`
-
-    // Execute query and extract meal suggestions
-    rows, err := db.Query(query, calories)
-    if err != nil {
-        panic(err)
-    }
-    defer rows.Close()
-
-    mealSuggestions := []MealSuggest{}
-    for rows.Next() {
-        var meal MealSuggest
-        err := rows.Scan(&meal.Id, &meal.Name)
-        if err != nil {
-            panic(err)
-        }
-        mealSuggestions = append(mealSuggestions, meal)
+    // Merge suggestions into an AllMealSuggest struct
+    allMealSuggest := AllMealSuggest{
+        Breakfast: breakfastSuggestions,
+        Lunch:     lunchSuggestions,
+        Dinner:    dinnerSuggestions,
     }
 
-    return mealSuggestions
+    return allMealSuggest
 }
 
