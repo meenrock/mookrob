@@ -158,15 +158,15 @@ func (s *MealRestService) EditMeal(ctx *gin.Context) {
 }
 
 // Meal Suggestion model
-type MealSuggestion struct {
-	Id           uuid.UUID `json:"id" binding:"required"`
-	Name         string    `json:"name" binding:"required"`
-	Energy       float64   `json:"energy" binding:"required"`
-	Protein      *float64  `json:"protein"`
-	Carbohydrate *float64  `json:"carbohydrate"`
-	Fat          *float64  `json:"fat"`
-	Sodium       *float64  `json:"sodium"`
-	Cholesterol  *float64  `json:"cholesterol"`
+type MealSuggest struct {
+    Id   uuid.UUID `json:"id"`
+    Name string    `json:"name"`
+}
+
+type AllMealSuggest struct {
+    Breakfast []MealSuggest `json:"breakfast"`
+    Lunch     []MealSuggest `json:"lunch"`
+    Dinner    []MealSuggest `json:"dinner"`
 }
 
 func generateMealSuggestions(caloriesPerDay int) []MealSuggestion {
@@ -194,14 +194,17 @@ func generateMealSuggestions(caloriesPerDay int) []MealSuggestion {
 }
 
 
+dbConfig := DatabaseConfig{
+    Host:     "mookrob-meal.cwle0giyacpw.us-east-1.rds.amazonaws.com",
+    Port:     "5432",
+    Name:     "meal",
+    Username: "mookrob",
+    Password: "mookrob_password",
+}
 
-func fetchMealSuggestionsFromDatabase(calories int) []MealSuggestion {
+func fetchMealSuggestionsFromDatabase(calories int) []MealSuggest {
     // Establish connection to PostgreSQL database 
-	// tong sai DB details in yaml chai pa I har mai jerr wa tong sai file nhai TT
-    db, err := connectToPostgreSQL(DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD)
-    if err != nil {
-        panic(err)
-    }
+    db, err := connectToPostgreSQL(*dbConfig)
     defer db.Close()
 
     // Prepare query to retrieve meal suggestions based on calorie limit
@@ -214,10 +217,10 @@ func fetchMealSuggestionsFromDatabase(calories int) []MealSuggestion {
     }
     defer rows.Close()
 
-    mealSuggestions := []MealSuggestion{}
+    mealSuggestions := []MealSuggest{}
     for rows.Next() {
-        var meal MealSuggestion
-        err := rows.Scan(&meal.Id, &meal.Name, &meal.Energy, &meal.Protein, &meal.Carbohydrate, &meal.Fat, &meal.Sodium, &meal.Cholesterol)
+        var meal MealSuggest
+        err := rows.Scan(&meal.Id, &meal.Name)
         if err != nil {
             panic(err)
         }

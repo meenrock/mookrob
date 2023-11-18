@@ -107,12 +107,14 @@ func (r *MealRepository) EditMeal(meal models.Meal) error {
 
 func (ctrls *MealRepository) SuggestMeal(c *gin.Context) {
 	// Extract user's BMI, BMR, and desired calorie intake from the request
-	bmi := c.PostForm("bmi")
-	bmr := c.PostForm("bmr")
-	desiredCalories := c.PostForm("desiredCalories")
+	// bmi := c.PostForm("bmi")
+	// bmr := c.PostForm("bmr")
+	// desiredCalories := c.PostForm("desiredCalories")
 
 	// Calculate calories per meal based on user's data
-	caloriesPerMeal := calculateCaloriesPerMeal(bmi, bmr, desiredCalories)
+	// caloriesPerMeal := calculateCaloriesPerMeal(bmi, bmr, desiredCalories)
+
+	caloriesPerMeal := 2000
 
 	// Check if calories per meal is valid
 	if caloriesPerMeal <= 0 {
