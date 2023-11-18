@@ -74,7 +74,6 @@ func (r *UserRepository) GetUserById(id uuid.UUID) (models.User, error) {
 }
 
 func (r *UserRepository) UpdateUser(user models.User) (*models.User, error) {
-	var id uuid.UUID
 	err := r.DB.QueryRow("UPDATE users "+
 		"SET "+
 		"status = $1, "+
@@ -97,7 +96,7 @@ func (r *UserRepository) UpdateUser(user models.User) (*models.User, error) {
 		return nil, err
 	}
 
-	return &id, nil
+	return &user, nil
 }
 
 func (r *UserRepository) ExistByEmail(email string) (bool, error) {
