@@ -123,10 +123,17 @@ func (s *UserRestService) CreateUser(ctx *gin.Context) {
 // GetUserById response model
 type UserDetailResponse struct {
 	Id          uuid.UUID    `json:"id"`
-	Name        string       `json:"name"`
 	Status      enums.Status `json:"status"`
+	FirstName   string       `json:"first_name"`
+	LastName    string       `json:"last_name"`
+	NickName    string       `json:"nick_name"`
 	PhoneNumber *string      `json:"phone_number"`
 	Email       string       `json:"email"`
+	Gender      string       `json:"gender"`
+	Age         int64        `json:"age"`
+	Height      float64      `json:"height"`
+	Weight      float64      `json:"weight"`
+	ExpectedBmi *float64     `json:"expected_bmi"`
 }
 
 func (s *UserRestService) GetUserById(ctx *gin.Context) {
@@ -153,10 +160,17 @@ func (s *UserRestService) GetUserById(ctx *gin.Context) {
 	// build response
 	userResponseDto := UserDetailResponse{
 		Id:          user.Id,
-		Name:        user.NickName,
 		Status:      user.Status,
+		FirstName:   user.FirstName,
+		LastName:    user.LastName,
+		NickName:    user.NickName,
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
+		Gender:      user.Gender,
+		Age:         user.Age,
+		Height:      user.Height,
+		Weight:      user.Weight,
+		ExpectedBmi: user.ExpectedBmi,
 	}
 
 	ctx.JSON(http.StatusOK, userResponseDto)
