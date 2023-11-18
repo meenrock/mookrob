@@ -120,6 +120,91 @@ func (s *UserRestService) CreateUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"role": authRes.Role, "username": authRes.Username})
 }
 
+type EditUserRequest struct {
+	Id          uuid.UUID    `json:"id"`
+	Status      enums.Status `json:"status"`
+	FirstName   string       `json:"first_name"`
+	LastName    string       `json:"last_name"`
+	NickName    string       `json:"nick_name"`
+	PhoneNumber *string      `json:"phone_number"`
+	Email       string       `json:"email"`
+	Gender      string       `json:"gender"`
+	Age         int64        `json:"age"`
+	Height      float64      `json:"height"`
+	Weight      float64      `json:"weight"`
+	ExpectedBmi *float64     `json:"expected_bmi"`
+}
+
+func (s *UserRestService) EditUser(ctx *gin.Context) {
+
+	userID := ctx.Param("id")
+	if userID == "" {
+		userID = ctx.Query("id")
+	}
+
+	// Validate if userID is provided
+	if userID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
+	var request EditUserRequest
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		log.Println("rest EditUser: error on parse request: ", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	exist, err := s.UserRepository.ExistByID(userID)
+	if err != nil {
+		log.Println("rest EditUser: error on query exist by ID: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+	if !exist {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	updatedUser := models.User{
+		FirstName:   request.FirstName,
+		LastName:    request.LastName,
+		NickName:    request.NickName,
+		PhoneNumber: request.PhoneNumber,
+		Email:       request.Email,
+		Gender:      request.Gender,
+		Age:         request.Age,
+		Height:      request.Height,
+		Weight:      request.Weight,
+		ExpectedBmi: request.ExpectedBmi,
+	}
+
+	// Update user record
+	user, err := s.UserRepository.UpdateUser(updatedUser)
+	if err != nil {
+		log.Println("rest EditUser: failed on user repository call: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	userResponseDto := UserDetailResponse{
+		Id:          user.Id,
+		Status:      user.Status,
+		FirstName:   user.FirstName,
+		LastName:    user.LastName,
+		NickName:    user.NickName,
+		PhoneNumber: user.PhoneNumber,
+		Email:       user.Email,
+		Gender:      user.Gender,
+		Age:         user.Age,
+		Height:      user.Height,
+		Weight:      user.Weight,
+		ExpectedBmi: user.ExpectedBmi,
+	}
+
+	ctx.JSON(http.StatusOK, userResponseDto)
+
+}
+
 // GetUserById response model
 type UserDetailResponse struct {
 	Id          uuid.UUID    `json:"id"`
