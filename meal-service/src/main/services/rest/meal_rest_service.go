@@ -156,3 +156,105 @@ func (s *MealRestService) EditMeal(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "Success"})
 }
+
+// Meal Suggestion model
+type MealSuggest struct {
+	Id   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
+type AllMealSuggest struct {
+	Breakfast []MealSuggest `json:"breakfast"`
+	Lunch     []MealSuggest `json:"lunch"`
+	Dinner    []MealSuggest `json:"dinner"`
+}
+
+func (s *MealRestService) SuggestMeal(ctx *gin.Context) {
+
+	caloriesPerDay := 1600
+
+	// Calculate meal calories based on the desired percentages
+	breakfastCalories := (caloriesPerDay * 3) / 10
+	lunchCalories := (caloriesPerDay * 5) / 10
+	dinnerCalories := (caloriesPerDay * 2) / 10
+
+	log.Println("rest SuggestMeal: breakfastCalories: ", breakfastCalories)
+	log.Println("rest SuggestMeal: lunchCalories: ", lunchCalories)
+	log.Println("rest SuggestMeal: dinnerCalories: ", dinnerCalories)
+
+	// Retrieve meal suggestions from the PostgreSQL database
+	breakfastRows, err := s.MealRepository.GetSuggestMeal(breakfastCalories)
+	if err != nil {
+		log.Println("rest SuggestMeal: failed on user repository call: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	allSuggest := AllMealSuggest{
+		Breakfast: make([]MealSuggest, 0),
+		Lunch:     make([]MealSuggest, 0),
+		Dinner:    make([]MealSuggest, 0),
+	}
+
+	for breakfastRows.Next() {
+		var meal MealSuggest
+		if err := breakfastRows.Scan(&meal.Id, &meal.Name); err != nil {
+			log.Printf("rest SuggestMeal failed on row scan: %v", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+			return
+		}
+
+		allSuggest.Breakfast = append(allSuggest.Breakfast, meal)
+	}
+
+	lunchRows, err := s.MealRepository.GetSuggestMeal(lunchCalories)
+	if err != nil {
+		log.Println("rest SuggestMeal: failed on user repository call: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	if err != nil {
+		log.Println("rest SuggestMeal: failed on user repository call: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	for lunchRows.Next() {
+		var meal MealSuggest
+		if err := lunchRows.Scan(&meal.Id, &meal.Name); err != nil {
+			log.Printf("rest SuggestMeal failed on row scan: %v", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+			return
+		}
+
+		allSuggest.Lunch = append(allSuggest.Lunch, meal)
+	}
+
+	dinnerRows, err := s.MealRepository.GetSuggestMeal(dinnerCalories)
+	if err != nil {
+		log.Println("rest SuggestMeal: failed on user repository call: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	if err != nil {
+		log.Println("rest SuggestMeal: failed on user repository call: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+		return
+	}
+
+	for dinnerRows.Next() {
+		var meal MealSuggest
+		if err := dinnerRows.Scan(&meal.Id, &meal.Name); err != nil {
+			log.Printf("rest SuggestMeal failed on row scan: %v", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+			return
+		}
+
+		allSuggest.Dinner = append(allSuggest.Dinner, meal)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data": allSuggest})
+
+}

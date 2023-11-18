@@ -102,3 +102,17 @@ func (r *MealRepository) EditMeal(meal models.Meal) error {
 
 	return nil
 }
+
+func (r *MealRepository) GetSuggestMeal(caloriesPerMeal int) (*sql.Rows, error) {
+	rows, err := r.DB.Query("SELECT "+
+		"m.id, "+
+		"m.name "+
+		"FROM meals m "+
+		"WHERE ABS(m.energy - $1) < 200 ", caloriesPerMeal)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
