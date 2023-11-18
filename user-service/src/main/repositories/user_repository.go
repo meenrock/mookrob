@@ -73,8 +73,46 @@ func (r *UserRepository) GetUserById(id uuid.UUID) (models.User, error) {
 	return user, nil
 }
 
+func (r *UserRepository) UpdateUser(user models.User) (*models.User, error) {
+	var id uuid.UUID
+	err := r.DB.QueryRow("UPDATE users "+
+		"SET "+
+		"status = $1, "+
+		"first_name = $2, "+
+		"last_name = $3, "+
+		"nick_name = $4, "+
+		"phone_number = $5, "+
+		"email = $6,"+
+		"gender = $7, "+
+		"age = $8, "+
+		"height = $9, "+
+		"weight = $10, "+
+		"expected_bmi = $11, "+
+		"created_at = $12, "+
+		"updated_at = $13"+
+		" WHERE users.id = $14", enums.ACTIVE, user.FirstName, user.LastName, user.NickName,
+		user.PhoneNumber, user.Email, user.Gender, user.Age, user.Height, user.Weight, user.ExpectedBmi, time.Now(), time.Now(), user.Id).Scan(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &id, nil
+}
+
 func (r *UserRepository) ExistByEmail(email string) (bool, error) {
 	row := r.DB.QueryRow("SELECT EXISTS (SELECT 1 FROM users WHERE email=$1)", email)
+
+	var exists bool
+	if err := row.Scan(&exists); err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
+func (r *UserRepository) ExistByID(uuid string) (bool, error) {
+	row := r.DB.QueryRow("SELECT EXISTS (SELECT 1 FROM users WHERE id=$1)", uuid)
 
 	var exists bool
 	if err := row.Scan(&exists); err != nil {
