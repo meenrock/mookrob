@@ -18,4 +18,4 @@ docker push {ECR_HOST}/{REMOTE_IMAGENAME}:latest
 kubectl apply -f ./kubernetes
 
 # force restart
-kubectl rollout restart deployment auth-app
+kubectl rollout restart deployment xxx-app

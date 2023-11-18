@@ -255,6 +255,6 @@ func (s *MealRestService) SuggestMeal(ctx *gin.Context) {
 		allSuggest.Dinner = append(allSuggest.Dinner, meal)
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": allSuggest})
+	ctx.JSON(http.StatusOK, gin.H{"breakfast": allSuggest.Breakfast, "lunch": allSuggest.Lunch, "dinner": allSuggest.Dinner})
 
 }
