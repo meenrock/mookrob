@@ -1,6 +1,7 @@
 package rest_services
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -104,6 +105,8 @@ func (s *UserMealRestService) CreateDailyUserMeal(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 	}
 
+	existId, _ := s.UserMealRepository.FindIdByUserIdMealTimeDate(userData.UserId, request.MealTime, time.Now())
+
 	// create daily user meal
 	newDailyUserMeal := models.DailyUserMeal{
 		MealId:   request.MealId,
@@ -112,11 +115,22 @@ func (s *UserMealRestService) CreateDailyUserMeal(ctx *gin.Context) {
 		Date:     time.Now(),
 	}
 
-	err := s.UserMealRepository.CreateDailyUserMeal(newDailyUserMeal)
-	if err != nil {
-		log.Println("rest CreateDailyUserMeal: failed on user meal repository call: ", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
-		return
+	if existId != nil {
+		fmt.Println("rest CreateDailyUserMeal: Record update!")
+		err := s.UserMealRepository.UpdateDailyUserMeal(*existId, newDailyUserMeal)
+		if err != nil {
+			log.Println("rest CreateDailyUserMeal: failed on user meal UpdateDailyUserMeal call: ", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+			return
+		}
+	} else {
+		fmt.Println("rest CreateDailyUserMeal: Record create!")
+		err := s.UserMealRepository.CreateDailyUserMeal(newDailyUserMeal)
+		if err != nil {
+			log.Println("rest CreateDailyUserMeal: failed on user meal CreateDailyUserMeal call: ", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal"})
+			return
+		}
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "Success"})

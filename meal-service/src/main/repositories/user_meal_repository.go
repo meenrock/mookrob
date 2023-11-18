@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/mookrob/servicemeal/main/enums"
 	"github.com/mookrob/servicemeal/main/models"
 
 	"github.com/google/uuid"
@@ -38,6 +39,28 @@ func (r *UserMealRepository) GetUserFavMealByUserId(id uuid.UUID) (*sql.Rows, er
 	}
 
 	return rows, nil
+}
+
+func (r *UserMealRepository) FindIdByUserIdMealTimeDate(userId uuid.UUID, mealTime enums.MealTime, date time.Time) (*uuid.UUID, error) {
+	var id uuid.UUID
+	err := r.DB.QueryRow("SELECT id FROM daily_user_meal WHERE user_id = $1 AND meal_time = $2 AND date = $3", userId, mealTime, date).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
+}
+
+func (r *UserMealRepository) UpdateDailyUserMeal(existId uuid.UUID, dailyUserMeal models.DailyUserMeal) error {
+	_, err := r.DB.Exec("UPDATE daily_user_meal "+
+		"SET meal_id = $1, "+
+		"updated_at = $2 "+
+		"WHERE id = $3", dailyUserMeal.MealId, time.Now(), existId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *UserMealRepository) CreateDailyUserMeal(dailyUserMeal models.DailyUserMeal) error {
