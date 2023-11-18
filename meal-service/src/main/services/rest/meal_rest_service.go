@@ -156,3 +156,74 @@ func (s *MealRestService) EditMeal(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "Success"})
 }
+
+// Meal Suggestion model
+type MealSuggestion struct {
+	Id           uuid.UUID `json:"id" binding:"required"`
+	Name         string    `json:"name" binding:"required"`
+	Energy       float64   `json:"energy" binding:"required"`
+	Protein      *float64  `json:"protein"`
+	Carbohydrate *float64  `json:"carbohydrate"`
+	Fat          *float64  `json:"fat"`
+	Sodium       *float64  `json:"sodium"`
+	Cholesterol  *float64  `json:"cholesterol"`
+}
+
+func generateMealSuggestions(caloriesPerDay int) []MealSuggestion {
+    // Calculate meal calories based on the desired percentages
+    breakfastCalories := caloriesPerDay * (3/10)
+    lunchCalories := caloriesPerDay * (5/10)
+    dinnerCalories := caloriesPerDay * (2/10)
+
+    // Retrieve breakfast suggestions from the PostgreSQL database
+    breakfastSuggestions := fetchMealSuggestionsFromDatabase(breakfastCalories)
+
+    // Retrieve lunch suggestions from the PostgreSQL database
+    lunchSuggestions := fetchMealSuggestionsFromDatabase(lunchCalories)
+
+    // Retrieve dinner suggestions from the PostgreSQL database
+    dinnerSuggestions := fetchMealSuggestionsFromDatabase(dinnerCalories)
+
+    // Combine suggestions into a single list
+    mealSuggestions := []MealSuggestion{}
+    mealSuggestions = append(mealSuggestions, breakfastSuggestions...)
+    mealSuggestions = append(mealSuggestions, lunchSuggestions...)
+    mealSuggestions = append(mealSuggestions, dinnerSuggestions...)
+
+    return mealSuggestions
+}
+
+
+
+func fetchMealSuggestionsFromDatabase(calories int) []MealSuggestion {
+    // Establish connection to PostgreSQL database 
+	// tong sai DB details in yaml chai pa I har mai jerr wa tong sai file nhai TT
+    db, err := connectToPostgreSQL(DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD)
+    if err != nil {
+        panic(err)
+    }
+    defer db.Close()
+
+    // Prepare query to retrieve meal suggestions based on calorie limit
+    query := `SELECT * FROM meals WHERE calories <= $1;`
+
+    // Execute query and extract meal suggestions
+    rows, err := db.Query(query, calories)
+    if err != nil {
+        panic(err)
+    }
+    defer rows.Close()
+
+    mealSuggestions := []MealSuggestion{}
+    for rows.Next() {
+        var meal MealSuggestion
+        err := rows.Scan(&meal.Id, &meal.Name, &meal.Energy, &meal.Protein, &meal.Carbohydrate, &meal.Fat, &meal.Sodium, &meal.Cholesterol)
+        if err != nil {
+            panic(err)
+        }
+        mealSuggestions = append(mealSuggestions, meal)
+    }
+
+    return mealSuggestions
+}
+

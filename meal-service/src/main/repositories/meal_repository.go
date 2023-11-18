@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"database/sql"
+	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/mookrob/servicemeal/main/models"
 )
@@ -101,4 +103,26 @@ func (r *MealRepository) EditMeal(meal models.Meal) error {
 	}
 
 	return nil
+}
+
+func (ctrls *MealRepository) SuggestMeal(c *gin.Context) {
+	// Extract user's BMI, BMR, and desired calorie intake from the request
+	bmi := c.PostForm("bmi")
+	bmr := c.PostForm("bmr")
+	desiredCalories := c.PostForm("desiredCalories")
+
+	// Calculate calories per meal based on user's data
+	caloriesPerMeal := calculateCaloriesPerMeal(bmi, bmr, desiredCalories)
+
+	// Check if calories per meal is valid
+	if caloriesPerMeal <= 0 {
+		c.JSON(http.StatusBadRequest, "Invalid calories per meal value")
+		return
+	}
+
+	// Generate meal suggestions based on calculated calories per meal
+	mealSuggestions := generateMealSuggestions(caloriesPerMeal)
+
+	// Return meal suggestions in JSON format
+	c.JSON(http.StatusOK, mealSuggestions)
 }
