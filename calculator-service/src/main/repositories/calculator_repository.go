@@ -9,6 +9,8 @@ import (
 
 	pb "github.com/mookrob/servicecalculator/main/grpc-server"
 
+	// calc "github.com/mookrob/servicecalculator/main/repositories/calculation"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -69,10 +71,11 @@ func (r *UserCalculatorRepositoryMongo) GetUserCalculationBMR(id uuid.UUID) (mon
 }
 
 func (r *UserCalculatorRepositoryMongo) AddParameter(id uuid.UUID, collection string, db_name string, ctx *gin.Context) {
+	// bmi, err := calc.BMIPercentile()
 	coll := ConnectMongoDB().Database(db_name).Collection(collection)
 	result, err := coll.InsertOne(
 		context.TODO(),
-		bson.D{})
+		bson.D{{"id", id}})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal.", "detailed": err})
 	}

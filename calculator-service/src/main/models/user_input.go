@@ -11,7 +11,7 @@ type UserBodyData struct {
 	UserId        uuid.UUID `bson:"user_id,omitempty"`
 	TransactionId string    `bson:"transaction_id"`
 	BMI           float64   `bson:"bmi"`
-	BMR           float64   `bson:"bmi"`
+	BMR           float64   `bson:"bmr"`
 	CreatedAt     time.Time `bson:"created_at"`
 	UpdatedAt     time.Time `bson:"updated_at"`
 }

@@ -32,15 +32,17 @@ func (r *Router) SetupRoutes() *gin.Engine {
 
 func (r *Router) handleSaveUserBodyData(c *gin.Context) {
 	var userData models.UserBodyData
+
 	if err := c.BindJSON(&userData); err != nil {
-		log.Printf("Failed to parse request body: %v", err)
+		body, _ := c.GetRawData()
+		log.Printf("Failed to parse request body: %v. Request body: %s", err, body)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
 	err := r.UserService.SaveUserBodyData(&userData)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save user data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save user data", "detail": err})
 		return
 	}
 
